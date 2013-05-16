@@ -69,155 +69,155 @@ function nbm_admin_scripts() {
 }
 
 function nbm_manage_menu() {
-    /* Display our administration screen */
-	echo '<div class="wrap">';
+    	/* Display our administration screen */
+
+		/*  Currently, the classes are the name of the field the question is dependent on.
+			We should find a more intelligent way to do this...
+
+			Class structures:
+				1)	hide_question -- hides initially
+				2)	dependent-on	
+				3)	role (to erase)
+		*/
 ?>
-<p>Please take a moment to tell us a little bit about your <b>Blogs @ Baruch site</b>. This information will be available only to the <b>B@B</b> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users.</p>
-	Who are you?<br />
-
-<?php
-	/*  Currently, the classes are the name of the field the question is dependent on.
-		We should find a more intelligent way to do this...
-	*/
-?>
-
-<?php
-
-	/*
-	Class structures:
-	1)	hide_question -- hides initially
-	2)	dependent-on	
-	3)	role (to erase)
-	*/
-?>
-	
-	<div id="role" name="role" style="margin: 5px 0 0 10px;">
-		I'm a...<br />
-		<input type="radio" name="role" value="professor"> Professor<br />
-		<input type="radio" name="role" value="student"> Student<br />
-		<input type="radio" name="role" value="staff"> Staff<br />
-	</div>
-
-	<div name="department" class="hide_question professor-staff">
-	What department are you in?<br />
-	<select name="department" class="professor-staff">
-		<option value="">---</option>
-		<option>Accountancy</option>
-		<option>American Studies</option>
-		<option>Arts and Sciences Ad Hoc Programs</option>
-		<option>Asian and Asian American Studies</option>
-		<option>Black and Latino Studies</option>
-		<option>Communication Studies</option>
-		<option>Economics and Finance</option>
-		<option>Education</option>
-		<option>English</option>
-		<option>Film Studies</option>
-		<option>Fine and Performing Arts</option>
-		<option>Global Studies</option>
-		<option>History</option>
-		<option>Interdisciplinary Programs and Courses</option>
-		<option>Jewish Studies</option>
-		<option>Journalism and the Writing Professions</option>
-		<option>Latin American and Caribbean Studies</option>
-		<option>Law</option>
-		<option>Library Department</option>
-		<option>Management</option>
-		<option>Marketing and International Business</option>
-		<option>Mathematics</option>
-		<option>Modern Languages and Comparative Literature</option>
-		<option>Natural Sciences</option>
-		<option>Philosophy</option>
-		<option>Physical and Health Education</option>
-		<option>Political Science</option>
-		<option>Psychology</option>
-		<option>Public Affairs</option>
-		<option>Real Estate</option>
-		<option>Religion and Culture</option>
-		<option>Sociology and Anthropology</option>
-		<option>Statistics and Computer Information Systems</option>
-		<option>Women's Studies</option>
-	</select>
-	</div>
-
-	<div class="hide_question professor">
-		Is this a course website? <br />
-		<select name="course_website" class="professor">
-			<option value="">---</option>
-			<option>Yes</option>
-			<option>No</option>
-		</select>
-	</div>
+<div class="wpnbm">
+	<p>Please take a moment to tell us a little bit about your <b>Blogs @ Baruch site</b>. This information will be available only to the <b>B@B</b> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users.</p>
 
 
-	<div class="hide_question course_website">
-	Course Name:
-	<input type="text" name="course_name" class="course_website" size="48">
-	</div>
 
+	<div class="role-data"> <?php 	// Start left column ?>
+		<div id="role" name="role">
+			<h3>Who are you?</h3>
 
-	<div class="course_website hide_question">
-		Course Number (and section if you have it):
-		<input type="text" name="course_number" class="course_website" size="24">
-	</div>
-
-
-	<div  class="hide_question student">
-	What is your major?<br />
-	<select name="major" class="student">
-		<option value="">---</option>
-		<option>Undeclared</option>
-		<option>Accountancy</option>
-		<option>Ad Hoc Major</option>
-		<option>Actuarial Science</option>
-		<option>Art History and Theatre (Ad Hoc)</option>
-		<option>Arts Administration (Ad Hoc)</option>
-		<option>Asian & Asian American Studies (Ad Hoc)</option>
-		<option>Biological Sciences</option>
-		<option>Business Journalism</option>
-		<option>Business Writing</option>
-		<option>Computer Information Systems</option>
-		<option>Corporate Communication</option>
-		<option>Economics</option>
-		<option>English</option>
-		<option>Finance</option>
-		<option>Graphic Communication</option>
-		<option>History</option>
-		<option>Industrial/Organizational Psychology</option>
-		<option>International Business</option>
-		<option>Journalism</option>
-		<option>Management</option>
-		<option>Management of Musical Enterprises</option>
-		<option>Marketing Management</option>
-		<option>Mathematics</option>
-		<option>Modern Languages & Comparative Literature (Ad Hoc)</option>
-		<option>Music</option>
-		<option>Natural Sciences (Ad Hoc)</option>
-		<option>Philosophy</option>
-		<option>Political Science</option>
-		<option>Psychology</option>
-		<option>Public Affairs</option>
-		<option>Real Estate</option>
-		<option>Religion and Culture (Ad Hoc)</option>
-		<option>Sociology</option>
-		<option>Spanish</option>
-		<option>Statistics</option>
-		<option>Statistics & Quantitative Modeling</option>
-	</select>
-	</div>
-
-	<div class="hide_question purpose">
-		What is the primary use for this blog?<br />
-		<select name="purpose">
-			<option value="">---</option>
-			<option value="personal">Personal Blog</option>
-			<option value="research">Research Blog</option>
-			<option value="portfolio">Portfolio</option>
-			<option value="other">Other</option>
-		</select>
-		<div id="use-other" class="hide_question">
-			Please specify: <input name="use-other" class="purpose">
+			<div class="question">
+			<span style="margin: 0px 0px 5px -5px;">I'm a ...</span><br />
+				<input type="radio" name="role" value="professor"> Professor<br />
+				<input type="radio" name="role" value="student"> Student<br />
+				<input type="radio" name="role" value="staff"> Staff<br />
+			</div>
 		</div>
-	</div>
+
+		<div id="department" class="hide_question professor-staff question">
+			What department are you in?<br />
+				<select name="department" class="professor-staff">
+				<option value="">---</option>
+				<option>Accountancy</option>
+				<option>American Studies</option>
+				<option>Arts and Sciences Ad Hoc Programs</option>
+				<option>Asian and Asian American Studies</option>
+				<option>Black and Latino Studies</option>
+				<option>Communication Studies</option>
+				<option>Economics and Finance</option>
+				<option>Education</option>
+				<option>English</option>
+				<option>Film Studies</option>
+				<option>Fine and Performing Arts</option>
+				<option>Global Studies</option>
+				<option>History</option>
+				<option>Interdisciplinary Programs and Courses</option>
+				<option>Jewish Studies</option>
+				<option>Journalism and the Writing Professions</option>
+				<option>Latin American and Caribbean Studies</option>
+				<option>Law</option>
+				<option>Library Department</option>
+				<option>Management</option>
+				<option>Marketing and International Business</option>
+				<option>Mathematics</option>
+				<option>Modern Languages and Comparative Literature</option>
+				<option>Natural Sciences</option>
+				<option>Philosophy</option>
+				<option>Physical and Health Education</option>
+				<option>Political Science</option>
+				<option>Psychology</option>
+				<option>Public Affairs</option>
+				<option>Real Estate</option>
+				<option>Religion and Culture</option>
+				<option>Sociology and Anthropology</option>
+				<option>Statistics and Computer Information Systems</option>
+				<option>Women's Studies</option>
+			</select>
+		</div>
+
+		<div  class="hide_question student question">
+			What is your major?<br />
+			<select name="major" class="student">
+				<option value="">---</option>
+				<option>Undeclared</option>
+				<option>Accountancy</option>
+				<option>Ad Hoc Major</option>
+				<option>Actuarial Science</option>
+				<option>Art History and Theatre (Ad Hoc)</option>
+				<option>Arts Administration (Ad Hoc)</option>
+				<option>Asian & Asian American Studies (Ad Hoc)</option>
+				<option>Biological Sciences</option>
+				<option>Business Journalism</option>
+				<option>Business Writing</option>
+				<option>Computer Information Systems</option>
+				<option>Corporate Communication</option>
+				<option>Economics</option>
+				<option>English</option>
+				<option>Finance</option>
+				<option>Graphic Communication</option>
+				<option>History</option>
+				<option>Industrial/Organizational Psychology</option>
+				<option>International Business</option>
+				<option>Journalism</option>
+				<option>Management</option>
+				<option>Management of Musical Enterprises</option>
+				<option>Marketing Management</option>
+				<option>Mathematics</option>
+				<option>Modern Languages & Comparative Literature (Ad Hoc)</option>
+				<option>Music</option>
+				<option>Natural Sciences (Ad Hoc)</option>
+				<option>Philosophy</option>
+				<option>Political Science</option>
+				<option>Psychology</option>
+				<option>Public Affairs</option>
+				<option>Real Estate</option>
+				<option>Religion and Culture (Ad Hoc)</option>
+				<option>Sociology</option>
+				<option>Spanish</option>
+				<option>Statistics</option>
+				<option>Statistics & Quantitative Modeling</option>
+			</select>
+		</div>
+	</div> <?php 	// End the person / role / info div -- left column ?>
+	
+	<div class="use-data temp hide_question"> <?php 	// Start right column ?>
+	<h3>Using this site</h3>
+		<div class="hide_question professor question">
+			Is this a course website? <br />
+			<select name="course_website" class="professor">
+				<option value="">---</option>
+				<option>Yes</option>
+				<option>No</option>
+			</select>
+		</div>
+
+		<div class="hide_question course_website question">
+		Course Name:
+		<input type="text" name="course_name" class="course_website" size="38">
+		</div>
+
+		<div class="course_website hide_question question">
+			Course Number (and section if you have it):
+			<input type="text" name="course_number" class="course_website" size="16">
+		</div>
+
+		<div class="hide_question purpose question">
+			What is the primary use for this blog?<br />
+			<select name="purpose">
+				<option value="">---</option>
+				<option value="personal">Personal Blog</option>
+				<option value="research">Research Blog</option>
+				<option value="portfolio">Portfolio</option>
+				<option value="other">Other</option>
+			</select>
+			<div id="use-other" class="hide_question">
+				Please specify: <input name="use-other" class="purpose">
+			</div>
+		</div>
+	</div> <? // End the second column that shows the use-data -- right column ?>
 </div>
 <?php
 }

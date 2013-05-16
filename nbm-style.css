@@ -3,3 +3,34 @@
 	display: none;	
 	
 }
+
+div.wpnbm {
+
+min-height: 300px;
+
+
+}
+
+div.wpnbm div {
+
+
+}
+
+div.question {
+	margin: 5px 0 10px 10px;
+}
+
+div.role-data {
+
+	float: left;
+	min-width: 400px;
+	min-height: 300px;
+	
+}
+
+div.use-data {
+	
+	float: left;
+	min-width: 400px;
+	min-height: 300px;
+}
