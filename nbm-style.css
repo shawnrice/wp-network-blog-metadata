@@ -4,16 +4,35 @@
 	
 }
 
-div.wpnbm {
+div.wpnbm select {
+margin: 3px 0 3px 0;
+/* 
+border: 1px orange solid;
 
-min-height: 300px;
+	Borders are just to test layout
 
+*/
+
+}
+
+div.wpnbm input {
+
+/* 
+border: 1px orange solid;
+
+	Borders are just to test layout
+
+*/
 
 }
 
 div.wpnbm div {
 
+/* border: 1px purple solid;
 
+	Borders are just to test layout
+
+*/
 }
 
 div.question {
@@ -24,7 +43,6 @@ div.role-data {
 
 	float: left;
 	min-width: 400px;
-	min-height: 300px;
 	
 }
 
@@ -32,5 +50,18 @@ div.use-data {
 	
 	float: left;
 	min-width: 400px;
-	min-height: 300px;
+}
+
+div.buttons {
+	
+margin-top: 200px; 
+position: absolute; 
+
+/*
+
+border: 1px black solid;	
+
+	Borders are just to test layout
+
+*/
 }
