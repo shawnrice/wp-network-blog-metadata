@@ -7,14 +7,14 @@ This plugin will collect and store metadata about blogs on a network install of 
 #### Features for this version
 * Network Admin Menu to list the questions that are active.
 * Network Admin Menu has option to populate the table with null values for existing blogs
-* <strike>Admin Menu to answer questions</strike>
+* ~~Admin Menu to answer questions~~
 * Hook into WP Blog registration form
 
 #### Todo
-* <strike>jQuery to hide fields dependent on selections</strike>
-* <strike>jQuery to clear fields dependent on selections</strike>
-* <strike>Minimal styling to place questions in two columns</strike>
-* <strike>Fix the use column to appear only after initial role selection</strike>
+* ~~jQuery to hide fields dependent on selections~~
+* ~~jQuery to clear fields dependent on selections~~
+* ~~Minimal styling to place questions in two columns~~
+* ~~Fix the use column to appear only after initial role selection~~
 * Fix UI in the menu so that questions don't jump around in such an ugly way when changing selections
 * Add in development comments
 
