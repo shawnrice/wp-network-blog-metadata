@@ -141,20 +141,23 @@ function nbm_manage_menu() {
 
 	<div class="hide_question professor">
 		Is this a course website? <br />
-		<input type="radio" name="course_website" class="course_website professor" value="true"> Yes <br />
-		<input type="radio" name="course_website" class="course_website professor" value="false"> No <br />
+		<select name="course_website" class="professor">
+			<option value="">---</option>
+			<option>Yes</option>
+			<option>No</option>
+		</select>
 	</div>
 
 
-	<div class="hide_question course_website professor">
+	<div class="hide_question course_website">
 	Course Name:
-	<input type="text" name="course_name" class="course_website professor" size="48">
+	<input type="text" name="course_name" class="course_website" size="48">
 	</div>
 
 
-	<div class="course_website hide_question professor">
+	<div class="course_website hide_question">
 		Course Number (and section if you have it):
-		<input type="text" name="course_number" class="course_website professor" size="24">
+		<input type="text" name="course_number" class="course_website" size="24">
 	</div>
 
 
@@ -216,6 +219,7 @@ function nbm_manage_menu() {
 		</div>
 	</div>
 </div>
+<?php
 }
 
 

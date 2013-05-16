@@ -5,34 +5,50 @@ jQuery(document).ready(function() {
 jQuery('input[name="role"]').change(function() {
 	
 	if (jQuery(this).val() === "professor") {
-		jQuery('.professor').show('drop');
-		jQuery('.student , .staff').hide('drop');
+		jQuery('.professor , .professor-staff').show('drop');
+		jQuery('.student , .staff , .purpose').hide('drop');
+		jQuery('.student , .staff , .purpose select').val('---');
 		
 	}
 	else if (jQuery(this).val() === "student") {
-		jQuery('.student').show('drop');
-		jQuery('.professor , .staff').hide('drop');
-		jQuery('.purpose').show('drop');
-		jQuery('.course_website').hide('drop');
-		jQuery('.course_website input').val('');
+		jQuery('.student , .purpose').show('drop');
+		jQuery('.professor , .staff, .professor-staff , .course_website').hide('drop');
+
+		// Reset some values if they were put in...
+		jQuery('.professor , .staff , .professor-staff , course_website input').val('');
+		jQuery('.professor , .professor-staff select').val('---');
+
 	}
 	else if (jQuery(this).val() === "staff") {
-		jQuery('.staff').show('drop');
+		jQuery('.staff , .professor-staff , .purpose').show('drop');
 		jQuery('.professor , .student').hide('drop');
-		jQuery('.department').show('drop');
-		jQuery('.purpose').show('drop');
-		jQuery('.course_website input').val('');
+		
+		// Reset some values if they were put in...
+		jQuery('.course_website , .professor , .student input').val('');
+		jQuery('.course_website , .student select').val('');
+		
 	}
 });
 
-jQuery('input[name="course_website"]').change(function() {
-	if (jQuery(this).val() === "true") {
+jQuery('select[name="course_website"]').change(function() {
+	if (jQuery(this).val() === "Yes") {
 		jQuery('.course_website').show('drop');
 		jQuery('.purpose').hide('drop');
+		jQuery('.purpose select').val('---');
 	}
-	else if (jQuery(this).val() === "false") {
+	else if (jQuery(this).val() === "No") {
 		jQuery('.course_website').hide('drop');
 		jQuery('.purpose').show('drop');
+
+		// Reset some values if they were put in...
+		jQuery('.course_website input').val('');
+	}
+	else if (jQuery(this).val() === "") {
+		jQuery('.course_website , .purpose').hide('drop');
+		
+		// Reset some values if they were put in...
+		jQuery('.course_website input').val('');
+		jQuery('.purpose select').val('');
 	}
 });
 jQuery('select[name="use"]').change(function() {
