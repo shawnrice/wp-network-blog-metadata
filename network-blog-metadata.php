@@ -75,12 +75,26 @@ function nbm_network_admin_menu() {
 
 
 function nbm_network_manage_menu() {
+global $wpdb;
+$tablename = $wpdb->prefix . "wpnbm_data";
+
+echo 'Data is: ';
+print_r($data);
+echo 'that was the data';
+
+$sql = 'SELECT * from ' . $tablename;
+$data = $wpdb->get_row($sql, ARRAY_A);
+
 
 ?>
 
 This is a network admin menu page. Reports and other things will be added here soon.
 
+<pre>
+<?php print_r($data); ?>
+</pre>
 <?php
+
 	
 }
 
@@ -113,9 +127,10 @@ function nbm_create_table() {
 
 	   global $wpdb;
 
-	   $table_name = $wpdb->base_prefix . "wpnbm_data"; 
+	   $tablename = $wpdb->base_prefix . "wpnbm_data"; 
 	
-$sql = "CREATE TABLE $table_name (
+	
+$sql = "CREATE TABLE $tablename (
 		  `blog_id` INT NOT NULL ,
 		  `user_role` VARCHAR(45) NULL ,
 		  `blog_intended_use` VARCHAR(45) NULL ,
@@ -148,21 +163,22 @@ function nbm_manage_menu() {
 
 	   	global $wpdb;
 
-	   	$table_name = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
+	   	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
 	
 		// These next calls should be coming from the network admin on an install script or activation script or something like that...
 		// The creation of the table shouldn't exist in the regular user admin menus
-		$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$table_name."'");
+		$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
 		if (empty($table_exists)) :
 			nbm_create_table();
 		endif;
 		
 		global $blog_id;
 
+		$row_exists = $wpdb->get_var('SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id);
 
     if ( $_SERVER["REQUEST_METHOD"] == "POST" ){ // For processing the form if submitted
 
-// Start processing the data in order to put into a SQL Query	
+		// Start processing the data in order to put into a SQL Query	
 		foreach ($_POST as $key => $val) :
 			if (!($val == NULL)) :
 				$_POST[$key] = '"' . $val . '"';
@@ -178,36 +194,68 @@ function nbm_manage_menu() {
 		else :
 			$purpose = $_POST['purpose'];
 		endif;
-// Finished replacing values within the $_POST array in order to insert the correct ones.
 		
-		$sql = 'UPDATE ' . $table_name . '
-				SET 
-				`user_role` = ' . $_POST["role"] . ',
-				`blog_intended_use` = ' . $purpose . ',
-				`course_title` = ' . $_POST["course_name"] . ',
-				`course_number` = ' . $_POST["course_number"] . ',
-				`course_enrollment` = NULL,
-				`course_multiple_section` = NULL,
-				`course_writing_intensive` = NULL,
-				`course_interactive` = NULL,
-				`visibility` = NULL,
-				`research_area` = NULL,
-				`portfolio_professional` = NULL,
-				`portfolio_content_type` = NULL,
-				`student_level` = NULL,
-				`student_major` = ' . $_POST["major"] . ',
-				`person_department` = ' . $_POST["department"] . ',
-				`class_project_course` = NULL,
-				`class_project_description` = NULL
-				WHERE blog_id = ' . $blog_id;
+		// Finished replacing values within the $_POST array in order to insert the correct ones.
+		if (!(empty($row_exists))) :
+			$sql = 'UPDATE ' . $tablename . ' 
+					SET 
+					`user_role` = ' . $_POST["role"] . ',
+					`blog_intended_use` = ' . $purpose . ',
+					`course_title` = ' . $_POST["course_name"] . ',
+					`course_number` = ' . $_POST["course_number"] . ',
+					`course_enrollment` = NULL,
+					`course_multiple_section` = NULL,
+					`course_writing_intensive` = NULL,
+					`course_interactive` = NULL,
+					`visibility` = NULL,
+					`research_area` = NULL,
+					`portfolio_professional` = NULL,
+					`portfolio_content_type` = NULL,
+					`student_level` = NULL,
+					`student_major` = ' . $_POST["major"] . ',
+					`person_department` = ' . $_POST["department"] . ',
+					`class_project_course` = NULL,
+					`class_project_description` = NULL  WHERE `blog_id` = ' . $blog_id;
+		else :
+			$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
+				$blog_id . ', ' .
+				$_POST["role"] . ', ' .
+				$purpose . ', ' .
+				$_POST["course_name"] . ', ' .
+				$_POST["course_number"] . ', ' . '
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				`student_major` = ' . $_POST["major"] . ', 
+				`person_department` = ' . $_POST["department"] . ', 
+				NULL,
+				NULL)';
+		endif;
+
 
 		$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
-		echo '<pre>';
-		print_r($sql);
-		echo '</pre>';
-		echo "Hey, thanks for submitting.";
+		echo '<div class="updated">Thank you for submitting the metadata.</div>';
+		print_nbm_data();
+	 
 
     } else {
+	 print_nbm_data();
+	}
+}
+
+function print_nbm_data() {
+	
+   	global $wpdb, $blog_id;
+	
+   	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
+	
+	
 	    	/* Display our administration screen */
 
 			/*  Currently, the classes are the name of the field the question is dependent on.
@@ -219,20 +267,16 @@ function nbm_manage_menu() {
 					3)	role (to erase)
 			*/
 
-			$sql = 	'SELECT * from ' . $table_name .
+			$sql = 	'SELECT * from ' . $tablename .
 					' WHERE `blog_id` = ' . $blog_id;
 					
 			$data = $wpdb->get_row($sql , ARRAY_A);
-			echo 'Data received: ';
-			echo '<pre>';
-			print_r($data);
-			echo '</pre>';
+
 	?>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 		<div class="wpnbm">
 			<p>Please take a moment to tell us a little bit about your <b>Blogs @ Baruch site</b>. This information will be available only to the <b>B@B</b> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users.</p>
 
-					<?php echo $data['role'];?>
 
 			<div class="role-data"> <?php 	// Start left column ?>
 				<div id="role" name="role">
@@ -360,11 +404,15 @@ function nbm_manage_menu() {
 						<option value="personal"<?php if ($data['blog_intended_use'] == 'personal') echo ' selected';?>>Personal Blog</option>
 						<option value="research"<?php if ($data['blog_intended_use'] == 'research') echo ' selected';?>>Research Blog</option>
 						<option value="portfolio"<?php if ($data['blog_intended_use'] == 'portfolio') echo ' selected';?>>Portfolio</option>
-						<option value="other"<?php if ($data['blog_intended_use'] == 'other') echo ' selected';?>>Other</option>
+<?php
+						$blog_intended_use = $data['blog_intended_use'];
+						$uses = array('course_website' , 'personal' , 'porfolio' , 'research' , 'other');?>
+						 echo "Regular use!<br/>";?>
+						<option value="other"<?php if (!(in_array($blog_intended_use, $uses))) echo ' selected';?>>Other</option>
 					</select>
 					<br />
-					<div class="<?php if (!($data['blog_intended_use'] =='other')) echo 'hide_question '; ?>use_other">
-						Please specify: <input name="use-other" class="purpose">
+					<div class="<?php if ((in_array($blog_intended_use, $uses))) echo 'hide_question '; ?>use_other">
+						Please specify: <input name="use-other" class="purpose"<?php if (!(in_array($blog_intended_use, $uses))) echo ' value="' . $blog_intended_use . '"';?>>
 					</div>
 				</div>
 			</div> <? // End the second column that shows the use-data -- right column ?>
@@ -375,10 +423,7 @@ function nbm_manage_menu() {
 		</div>
 	</form>
 	<?php
-	}
 }
-
-
 
 function nbm_menu() {
 	// Add the new admin menu and page and save the returned hook suffix
