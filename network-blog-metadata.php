@@ -49,6 +49,13 @@ If we have populated answers, then we can always just not apply the css to hide 
 
 */
 
+/*
+http://codex.wordpress.org/Function_Reference/register_activation_hook
+<?php register_activation_hook( $file, $function ); ?> 
+
+<?php add_action('network_admin_menu', 'function_name'); ?>
+
+*/
 
 /***
 
@@ -58,6 +65,24 @@ I'm opting to store the information in a separate table as we discussed. At leas
 
 add_action( 'admin_init', 'nbm_admin_init' );
 add_action( 'admin_menu', 'nbm_admin_menu' );
+add_action('network_admin_menu', 'nbm_network_admin_menu');
+
+function nbm_network_admin_menu() {
+	
+	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data.png' );
+	
+}
+
+
+function nbm_network_manage_menu() {
+
+?>
+
+This is a network admin menu page. Reports and other things will be added here soon.
+
+<?php
+	
+}
 
 function nbm_admin_init() {
     /* Register our script. */

@@ -5,6 +5,8 @@
 
 div.wpnbm {
 
+clear: both;
+
 }
 
 div.wpnbm select {
@@ -54,13 +56,17 @@ div.use-data {
 	
 	float: left;
 	min-width: 400px;
-		min-height: 200px;
+	min-height: 200px;
+	margin: 0 auto 15px;
+	
 }
 
 div.buttons {
+	margin: 0 auto 15px;
 	
-margin-top: 200px; 
-position: absolute; 
+ 
+clear: both;
+/* position: absolute; */
 
 /*
 
