@@ -74,16 +74,56 @@ function nbm_network_admin_menu() {
 }
 
 
+function nbm_populate_null() {
+	// Function populates null values in the wp_wpnbm_data table for each blog that doesn't exist in there.
+	
+	
+}
+// Only add the script for the page site-new.php (the page hook).
+add_action( "admin_print_scripts-site-new.php", 'my_admin_scripts' );
+
+function my_admin_scripts() {
+    wp_register_script('sign-up-extend', plugins_url('alter-sign-up.js', __FILE__));
+    wp_enqueue_script('sign-up-extend');
+}
+function add_new_blog_field($blog_id, $user_id, $domain, $path, $site_id, $meta) {
+
+    // Make sure the user can perform this action and the request came from the correct page.
+//	global $blog_id;
+
+	switch_to_blog($blog_id);
+   
+	$path = $path . 'wp-admin/admin.php?page=nbm_answers';
+//	wp_redirect($path);
+//	exit;
+				
+//	echo "What what?";
+//	http://localhost/~Sven/invest/onemoretimea/
+
+    // Use a default value here if the field was not submitted.
+    $new_field_value = 'default';
+
+    if ( !empty($_POST['blog']['new_field']) )
+        $new_field_value = $_POST['blog']['new_field'];
+
+    // save option into the database
+    update_option( 'new_field', $new_field_value);
+
+    restore_current_blog();
+}
+
+add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6);
+
 function nbm_network_manage_menu() {
-global $wpdb;
-$tablename = $wpdb->prefix . "wpnbm_data";
+	global $wpdb;
+	$tablename = $wpdb->prefix . "wpnbm_data";
 
-echo 'Data is: ';
-print_r($data);
-echo 'that was the data';
+	echo 'Data is: ';
+	print_r($data);
+	echo 'that was the data';
 
-$sql = 'SELECT * from ' . $tablename;
-$data = $wpdb->get_row($sql, ARRAY_A);
+	$sql = 'SELECT * from ' . $tablename;
+	$data = $wpdb->get_results($sql, ARRAY_A);
 
 
 ?>
@@ -190,7 +230,7 @@ function nbm_manage_menu() {
 		if ($_POST['course_website'] == '"Yes"') :
 			$purpose = '"course_website"';
 		elseif ($_POST['purpose'] == '"other"') :
-			$purpose = $_POST['use-other'];
+			$purpose = $_POST['use_other'];
 		else :
 			$purpose = $_POST['purpose'];
 		endif;
@@ -270,7 +310,7 @@ function print_nbm_data() {
 			$sql = 	'SELECT * from ' . $tablename .
 					' WHERE `blog_id` = ' . $blog_id;
 					
-			$data = $wpdb->get_row($sql , ARRAY_A);
+			$data = $wpdb->get_row($sql , ARRAY_A); // get_row method works here because there is only ever one row that matches.
 
 	?>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
@@ -412,7 +452,7 @@ function print_nbm_data() {
 					</select>
 					<br />
 					<div class="<?php if ((in_array($blog_intended_use, $uses))) echo 'hide_question '; ?>use_other">
-						Please specify: <input name="use-other" class="purpose"<?php if (!(in_array($blog_intended_use, $uses))) echo ' value="' . $blog_intended_use . '"';?>>
+						Please specify: <input name="use_other" class="purpose"<?php if (!(in_array($blog_intended_use, $uses))) echo ' value="' . $blog_intended_use . '"';?>>
 					</div>
 				</div>
 			</div> <? // End the second column that shows the use-data -- right column ?>
