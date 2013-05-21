@@ -76,8 +76,35 @@ function nbm_network_admin_menu() {
 
 function nbm_populate_null() {
 	// Function populates null values in the wp_wpnbm_data table for each blog that doesn't exist in there.
+	// I can hook this into an install function later.
+	
+	global $wpdb;
+	$tablename = $wpdb->prefix . "wpnbm_data";
+	
+	$sql = 'SELECT * from ' . $tablename;
+	$data = $wpdb->get_results($sql, ARRAY_A);
+
+	$sql = 'SELECT `blog_id` from wp_blogs';
+	$ids = $wpdb->get_results($sql, ARRAY_N);
+	array_walk($ids,'flatten_array');
+	$ids = array_flip($ids);
+
+	foreach ($data as $datum) :
+		if ( in_array( $datum['blog_id'] , array_keys($ids) )) :
+			unset($ids[$datum['blog_id']]);
+		endif;
+	endforeach;
+	$ids = array_flip($ids);
+	$count = 0;
+	foreach ( $ids as $id ) :
+		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
+		$result = $wpdb->get_results($sql);
+		$count++;
+	endforeach;
 	
 	
+	echo '<div class="updated">' . $count . ' blogs with null values added into the database.</div>';
+		
 }
 // Only add the script for the page site-new.php (the page hook).
 add_action( "admin_print_scripts-site-new.php", 'my_admin_scripts' );
@@ -114,28 +141,64 @@ function add_new_blog_field($blog_id, $user_id, $domain, $path, $site_id, $meta)
 
 add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6);
 
+function flatten_array(&$item) {
+
+	$item = $item[0];
+	
+}
+
 function nbm_network_manage_menu() {
 	global $wpdb;
 	$tablename = $wpdb->prefix . "wpnbm_data";
+	
+	if (!(empty($_POST))) :
+		if ( isset( $_POST['do_null'] ) ) :
+			nbm_populate_null();
+		endif;
+	endif;
 
-	echo 'Data is: ';
-	print_r($data);
-	echo 'that was the data';
+	$all_blogs = count($wpdb->get_results('SELECT `blog_id` from wp_blogs' , ARRAY_A));
 
-	$sql = 'SELECT * from ' . $tablename;
-	$data = $wpdb->get_results($sql, ARRAY_A);
+	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);
 
-
+	foreach ( $data as $datum ) :
+		if ( ! ( isset( $null ) ) ) $null = 0;
+		if ( ! ( isset( $student ) ) ) $student = 0;
+		if ( ! ( isset( $professor ) ) ) $professor = 0;
+		if ( ! ( isset( $staff ) ) ) $staff = 0;
+		if ( ! ( isset( $course_website ) ) ) $course_website = 0;		
+						
+		if (is_null($datum['user_role'])) $null++;
+		if ($datum['user_role'] == 'student' ) $student++;
+		if ($datum['user_role'] == 'staff' ) $staff++;
+		if ($datum['user_role'] == 'professor' ) $professor++;
+		if ($datum['blog_intended_use'] == 'course_website' ) $course_website++;										
+	endforeach;
+	
+	$total = count($data);
+	
 ?>
 
-This is a network admin menu page. Reports and other things will be added here soon.
+This is a network admin menu page. Reports and other things will be added here soon. <br />
+<p>There are <?php echo $total; ?> blogs in the wp_wpnbm_data table out of <?php echo $all_blogs; ?> all blogs in the system. (<?php echo round((($total/$all_blogs)*100),2); ?>%)
+<p>There are currently <?php echo $null; ?> blogs without any information entered. (<?php echo round((($null/$total)*100),2); ?>%)</p>
+<p>There are currently <?php echo $professor; ?> blogs by professors. (<?php echo round((($professor/$total)*100),2); ?>%)</p>
+<p>There are currently <?php echo $student; ?> blogs by students. (<?php echo round((($student/$total)*100),2); ?>%)</p>
+<p>There are currently <?php echo $staff; ?> blogs by staff. (<?php echo round((($staff/$total)*100),2); ?>%)</p>
+<p>There are currently <?php echo $course_website; ?> course websites. (<?php echo round((($course_website/$total)*100),2); ?>%)</p>
+<br />
+<br />
+<br />
+<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+<input type="submit" value="Fill in null values for unaccounted blogs" name="do_null">
+</form>
+<br />
+<br />
+<br />
+<br />
+<p><b>What other reports should go here? I can do a bunch. We could also turn these things into pie charts and fancy stuff.</b></p>
 
-<pre>
-<?php print_r($data); ?>
-</pre>
-<?php
-
-	
+<?php	
 }
 
 function nbm_admin_init() {
