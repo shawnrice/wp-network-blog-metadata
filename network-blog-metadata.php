@@ -40,6 +40,22 @@ License: GPL2 ? Which is best?
 *****														 *****
 *****														 *****/
 
+
+/*
+
+
+If we have populated answers, then we can always just not apply the css to hide the questions that shouldn't be available.
+
+
+*/
+
+
+/***
+
+I'm opting to store the information in a separate table as we discussed. At least for B@B, this seems to be the best solution in that we can use the table to run reports on but won't have to tax the database as much in order to get B@B-wide information
+
+***/
+
 add_action( 'admin_init', 'nbm_admin_init' );
 add_action( 'admin_menu', 'nbm_admin_menu' );
 
@@ -115,12 +131,13 @@ function nbm_manage_menu() {
 		if (empty($table_exists)) :
 			nbm_create_table();
 		endif;
+		
+		global $blog_id;
 
 
     if ( $_SERVER["REQUEST_METHOD"] == "POST" ){ // For processing the form if submitted
-		global $blog_id;
 
-// Start processing the data in order to put into a SQL Query		
+// Start processing the data in order to put into a SQL Query	
 		foreach ($_POST as $key => $val) :
 			if (!($val == NULL)) :
 				$_POST[$key] = '"' . $val . '"';
@@ -130,7 +147,7 @@ function nbm_manage_menu() {
 		endforeach;
 		
 		if ($_POST['course_website'] == '"Yes"') :
-			$purpose = $_POST['course_website'];
+			$purpose = '"course_website"';
 		elseif ($_POST['purpose'] == '"other"') :
 			$purpose = $_POST['use-other'];
 		else :
@@ -160,6 +177,10 @@ function nbm_manage_menu() {
 				WHERE blog_id = ' . $blog_id;
 
 		$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
+		echo '<pre>';
+		print_r($sql);
+		echo '</pre>';
+		echo "Hey, thanks for submitting.";
 
     } else {
 	    	/* Display our administration screen */
@@ -172,12 +193,21 @@ function nbm_manage_menu() {
 					2)	dependent-on	
 					3)	role (to erase)
 			*/
+
+			$sql = 	'SELECT * from ' . $table_name .
+					' WHERE `blog_id` = ' . $blog_id;
+					
+			$data = $wpdb->get_row($sql , ARRAY_A);
+			echo 'Data received: ';
+			echo '<pre>';
+			print_r($data);
+			echo '</pre>';
 	?>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 		<div class="wpnbm">
 			<p>Please take a moment to tell us a little bit about your <b>Blogs @ Baruch site</b>. This information will be available only to the <b>B@B</b> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users.</p>
 
-
+					<?php echo $data['role'];?>
 
 			<div class="role-data"> <?php 	// Start left column ?>
 				<div id="role" name="role">
@@ -185,130 +215,130 @@ function nbm_manage_menu() {
 
 					<div class="question">
 					<span style="margin: 0px 0px 5px -5px;">I'm a ...</span><br />
-						<input type="radio" name="role" value="professor"> Professor<br />
-						<input type="radio" name="role" value="student"> Student<br />
-						<input type="radio" name="role" value="staff"> Staff<br />
+						<input type="radio" name="role" value="professor"<?php if ($data['user_role'] == 'professor') echo ' checked';?>> Professor<br />
+						<input type="radio" name="role" value="student"<?php if ($data['user_role'] == 'student') echo ' checked';?>> Student<br />
+						<input type="radio" name="role" value="staff"<?php if ($data['user_role'] == 'staff') echo ' checked';?>> Staff<br />
 					</div>
 				</div>
 
-				<div id="department" class="hide_question professor-staff question">
+				<div id="department" class="<?php if (!(($data['user_role'] =='professor') || ($data['user_role'] == 'staff'))) echo 'hide_question '; ?>professor-staff question">
 					What department are you in?<br />
 						<select name="department" class="professor-staff">
-						<option value="">---</option>
-						<option>Accountancy</option>
-						<option>American Studies</option>
-						<option>Arts and Sciences Ad Hoc Programs</option>
-						<option>Asian and Asian American Studies</option>
-						<option>Black and Latino Studies</option>
-						<option>Communication Studies</option>
-						<option>Economics and Finance</option>
-						<option>Education</option>
-						<option>English</option>
-						<option>Film Studies</option>
-						<option>Fine and Performing Arts</option>
-						<option>Global Studies</option>
-						<option>History</option>
-						<option>Interdisciplinary Programs and Courses</option>
-						<option>Jewish Studies</option>
-						<option>Journalism and the Writing Professions</option>
-						<option>Latin American and Caribbean Studies</option>
-						<option>Law</option>
-						<option>Library Department</option>
-						<option>Management</option>
-						<option>Marketing and International Business</option>
-						<option>Mathematics</option>
-						<option>Modern Languages and Comparative Literature</option>
-						<option>Natural Sciences</option>
-						<option>Philosophy</option>
-						<option>Physical and Health Education</option>
-						<option>Political Science</option>
-						<option>Psychology</option>
-						<option>Public Affairs</option>
-						<option>Real Estate</option>
-						<option>Religion and Culture</option>
-						<option>Sociology and Anthropology</option>
-						<option>Statistics and Computer Information Systems</option>
-						<option>Women's Studies</option>
-					</select>
+							<option value="">---</option>
+							<option <?php if ($data['person_department'] == "Accountancy") echo 'selected';?>>Accountancy</option>
+							<option <?php if ($data['person_department'] == "American Studies") echo 'selected';?>>American Studies</option>
+							<option <?php if ($data['person_department'] == "Arts and Sciences Ad Hoc Programs") echo 'selected';?>>Arts and Sciences Ad Hoc Programs</option>
+							<option <?php if ($data['person_department'] == "Asian and Asian American Studies") echo 'selected';?>>Asian and Asian American Studies</option>
+							<option <?php if ($data['person_department'] == "Black and Latino Studies") echo 'selected';?>>Black and Latino Studies</option>
+							<option <?php if ($data['person_department'] == "Communication Studies") echo 'selected';?>>Communication Studies</option>
+							<option <?php if ($data['person_department'] == "Economics and Finance") echo 'selected';?>>Economics and Finance</option>
+							<option <?php if ($data['person_department'] == "Education") echo 'selected';?>>Education</option>
+							<option <?php if ($data['person_department'] == "English") echo 'selected';?>>English</option>
+							<option <?php if ($data['person_department'] == "Film Studies") echo 'selected';?>>Film Studies</option>
+							<option <?php if ($data['person_department'] == "Fine and Performing Arts") echo 'selected';?>>Fine and Performing Arts</option>
+							<option <?php if ($data['person_department'] == "Global Studies") echo 'selected';?>>Global Studies</option>
+							<option <?php if ($data['person_department'] == "History") echo 'selected';?>>History</option>
+							<option <?php if ($data['person_department'] == "Interdisciplinary Programs and Courses") echo 'selected';?>>Interdisciplinary Programs and Courses</option>
+							<option <?php if ($data['person_department'] == "Jewish Studies") echo 'selected';?>>Jewish Studies</option>
+							<option <?php if ($data['person_department'] == "Journalism and the Writing Professions") echo 'selected';?>>Journalism and the Writing Professions</option>
+							<option <?php if ($data['person_department'] == "Latin American and Caribbean Studies") echo 'selected';?>>Latin American and Caribbean Studies</option>
+							<option <?php if ($data['person_department'] == "Law") echo 'selected';?>>Law</option>
+							<option <?php if ($data['person_department'] == "Library Department") echo 'selected';?>>Library Department</option>
+							<option <?php if ($data['person_department'] == "Management") echo 'selected';?>>Management</option>
+							<option <?php if ($data['person_department'] == "Marketing and International Business") echo 'selected';?>>Marketing and International Business</option>
+							<option <?php if ($data['person_department'] == "Mathematics") echo 'selected';?>>Mathematics</option>
+							<option <?php if ($data['person_department'] == "Modern Languages and Comparative Literature") echo 'selected';?>>Modern Languages and Comparative Literature</option>
+							<option <?php if ($data['person_department'] == "Natural Sciences") echo 'selected';?>>Natural Sciences</option>
+							<option <?php if ($data['person_department'] == "Philosophy") echo 'selected';?>>Philosophy</option>
+							<option <?php if ($data['person_department'] == "Physical and Health Education") echo 'selected';?>>Physical and Health Education</option>
+							<option <?php if ($data['person_department'] == "Political Science") echo 'selected';?>>Political Science</option>
+							<option <?php if ($data['person_department'] == "Psychology") echo 'selected';?>>Psychology</option>
+							<option <?php if ($data['person_department'] == "Public Affairs") echo 'selected';?>>Public Affairs</option>
+							<option <?php if ($data['person_department'] == "Real Estate") echo 'selected';?>>Real Estate</option>
+							<option <?php if ($data['person_department'] == "Religion and Culture") echo 'selected';?>>Religion and Culture</option>
+							<option <?php if ($data['person_department'] == "Sociology and Anthropology") echo 'selected';?>>Sociology and Anthropology</option>
+							<option <?php if ($data['person_department'] == "Statistics and Computer Information Systems") echo 'selected';?>>Statistics and Computer Information Systems</option>
+							<option <?php if ($data['person_department'] == "Women's Studies") echo 'selected';?>>Women's Studies</option>
+						</select>
 				</div>
 
 				<div  class="hide_question student question">
 					What is your major?<br />
-					<select name="major" class="student">
+					<select name="major" class="<?php if (!($data['user_role'] =='student')) echo 'hide_question'; ?>student">
 						<option value="">---</option>
-						<option>Undeclared</option>
-						<option>Accountancy</option>
-						<option>Ad Hoc Major</option>
-						<option>Actuarial Science</option>
-						<option>Art History and Theatre (Ad Hoc)</option>
-						<option>Arts Administration (Ad Hoc)</option>
-						<option>Asian & Asian American Studies (Ad Hoc)</option>
-						<option>Biological Sciences</option>
-						<option>Business Journalism</option>
-						<option>Business Writing</option>
-						<option>Computer Information Systems</option>
-						<option>Corporate Communication</option>
-						<option>Economics</option>
-						<option>English</option>
-						<option>Finance</option>
-						<option>Graphic Communication</option>
-						<option>History</option>
+						<option<?php if ($data['student_major'] == "Undeclared") echo " selected";?>>Undeclared</option>
+						<option<?php if ($data['student_major'] == "Accountancy") echo " selected";?>>Accountancy</option>
+						<option<?php if ($data['student_major'] == "Ad Hoc Major") echo " selected";?>>Ad Hoc Major</option>
+						<option<?php if ($data['student_major'] == "Actuarial Science") echo " selected";?>>Actuarial Science</option>
+						<option<?php if ($data['student_major'] == "Art History and Theatre (Ad Hoc)") echo " selected";?>>Art History and Theatre (Ad Hoc)</option>
+						<option<?php if ($data['student_major'] == "Arts Administration (Ad Hoc)") echo " selected";?>>Arts Administration (Ad Hoc)</option>
+						<option<?php if ($data['student_major'] == "Asian & Asian American Studies (Ad Hoc)") echo " selected";?>>Asian & Asian American Studies (Ad Hoc)</option>
+						<option<?php if ($data['student_major'] == "Biological Sciences") echo " selected";?>>Biological Sciences</option>
+						<option<?php if ($data['student_major'] == "Business Journalism") echo " selected";?>>Business Journalism</option>
+						<option<?php if ($data['student_major'] == "Business Writing") echo " selected";?>>Business Writing</option>
+						<option<?php if ($data['student_major'] == "Computer Information Systems") echo " selected";?>>Computer Information Systems</option>
+						<option<?php if ($data['student_major'] == "Corporate Communication") echo " selected";?>>Corporate Communication</option>
+						<option<?php if ($data['student_major'] == "Economics") echo " selected";?>>Economics</option>
+						<option<?php if ($data['student_major'] == "English") echo " selected";?>>English</option>
+						<option<?php if ($data['student_major'] == "Finance") echo " selected";?>>Finance</option>
+						<option<?php if ($data['student_major'] == "Graphic Communication") echo " selected";?>>Graphic Communication</option>
+						<option<?php if ($data['student_major'] == "History") echo " selected";?>>History</option>
 						<option>Industrial/Organizational Psychology</option>
-						<option>International Business</option>
-						<option>Journalism</option>
-						<option>Management</option>
-						<option>Management of Musical Enterprises</option>
-						<option>Marketing Management</option>
-						<option>Mathematics</option>
-						<option>Modern Languages & Comparative Literature (Ad Hoc)</option>
-						<option>Music</option>
-						<option>Natural Sciences (Ad Hoc)</option>
-						<option>Philosophy</option>
-						<option>Political Science</option>
-						<option>Psychology</option>
-						<option>Public Affairs</option>
-						<option>Real Estate</option>
-						<option>Religion and Culture (Ad Hoc)</option>
-						<option>Sociology</option>
-						<option>Spanish</option>
-						<option>Statistics</option>
-						<option>Statistics & Quantitative Modeling</option>
+						<option<?php if ($data['student_major'] == "International Business") echo " selected";?>>International Business</option>
+						<option<?php if ($data['student_major'] == "Journalism") echo " selected";?>>Journalism</option>
+						<option<?php if ($data['student_major'] == "Management") echo " selected";?>>Management</option>
+						<option<?php if ($data['student_major'] == "Management of Musical Enterprises") echo " selected";?>>Management of Musical Enterprises</option>
+						<option<?php if ($data['student_major'] == "Marketing Management") echo " selected";?>>Marketing Management</option>
+						<option<?php if ($data['student_major'] == "Mathematics") echo " selected";?>>Mathematics</option>
+						<option<?php if ($data['student_major'] == "Modern Languages & Comparative Literature (Ad Hoc)") echo " selected";?>>Modern Languages & Comparative Literature (Ad Hoc)</option>
+						<option<?php if ($data['student_major'] == "Music") echo " selected";?>>Music</option>
+						<option<?php if ($data['student_major'] == "Natural Sciences (Ad Hoc)") echo " selected";?>>Natural Sciences (Ad Hoc)</option>
+						<option<?php if ($data['student_major'] == "Philosophy") echo " selected";?>>Philosophy</option>
+						<option<?php if ($data['student_major'] == "Political Science") echo " selected";?>>Political Science</option>
+						<option<?php if ($data['student_major'] == "Psychology") echo " selected";?>>Psychology</option>
+						<option<?php if ($data['student_major'] == "Public Affairs") echo " selected";?>>Public Affairs</option>
+						<option<?php if ($data['student_major'] == "Real Estate") echo " selected";?>>Real Estate</option>
+						<option<?php if ($data['student_major'] == "Religion and Culture (Ad Hoc)") echo " selected";?>>Religion and Culture (Ad Hoc)</option>
+						<option<?php if ($data['student_major'] == "Sociology") echo " selected";?>>Sociology</option>
+						<option<?php if ($data['student_major'] == "Spanish") echo " selected";?>>Spanish</option>
+						<option<?php if ($data['student_major'] == "Statistics") echo " selected";?>>Statistics</option>
+						<option<?php if ($data['student_major'] == "Statistics & Quantitative Modeling") echo " selected";?>>Statistics & Quantitative Modeling</option>
 					</select>
 				</div>
 			</div> <?php 	// End the person / role / info div -- left column ?>
 	
-			<div class="use-data temp hide_question"> <?php 	// Start right column ?>
+			<div class="<?php if (!($data['user_role'])) echo 'hide_question ';?>use-data temp"> <?php 	// Start right column ?>
 			<h3>Using this site</h3>
-				<div class="hide_question professor question">
+				<div class="<?php if (!($data['user_role'] =='professor')) echo 'hide_question '; ?>professor question">
 					Is this a course website? <br />
 					<select name="course_website" class="professor">
 						<option value="">---</option>
-						<option>Yes</option>
-						<option>No</option>
+						<option<?php if ($data['blog_intended_use'] == 'course_website') echo ' selected';?>>Yes</option>
+						<option<?php if (($data['user_role'] == 'professor') && (!(is_null($data['blog_intended_use']))) && ($data['blog_intended_use'] != 'course_website')) echo ' selected';?>>No</option>
 					</select>
 				</div>
 
-				<div class="hide_question course_website question">
-				Course Name:
-				<input type="text" name="course_name" class="course_website" size="38">
+				<div class="<?php if (!(($data['user_role'] =='professor') && ($data['blog_intended_use']== 'course_website'))) echo 'hide_question '; ?>course_website question">
+					Course Name:
+					<input type="text" name="course_name" class="course_website" size="38">
 				</div>
 
-				<div class="course_website hide_question question">
+				<div class="<?php if (!(($data['user_role'] =='professor') && ($data['blog_intended_use']== 'course_website'))) echo 'hide_question '; ?>course_website question">
 					Course Number (and section if you have it):
 					<input type="text" name="course_number" class="course_website" size="16">
 				</div>
 
-				<div class="hide_question purpose question">
+				<div class="<?php if (($data['user_role'] =='professor') && ($data['blog_intended_use']== 'course_website')) echo 'hide_question '; ?>purpose question">
 					What is the primary use for this blog?<br />
 					<select name="purpose">
 						<option value="">---</option>
-						<option value="personal">Personal Blog</option>
-						<option value="research">Research Blog</option>
-						<option value="portfolio">Portfolio</option>
-						<option value="other">Other</option>
+						<option value="personal"<?php if ($data['blog_intended_use'] == 'personal') echo ' selected';?>>Personal Blog</option>
+						<option value="research"<?php if ($data['blog_intended_use'] == 'research') echo ' selected';?>>Research Blog</option>
+						<option value="portfolio"<?php if ($data['blog_intended_use'] == 'portfolio') echo ' selected';?>>Portfolio</option>
+						<option value="other"<?php if ($data['blog_intended_use'] == 'other') echo ' selected';?>>Other</option>
 					</select>
 					<br />
-					<div class="hide_question use_other">
+					<div class="<?php if (!($data['blog_intended_use'] =='other')) echo 'hide_question '; ?>use_other">
 						Please specify: <input name="use-other" class="purpose">
 					</div>
 				</div>

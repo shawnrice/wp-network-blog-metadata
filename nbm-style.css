@@ -1,7 +1,10 @@
 .hide_question {
 
-	display: none;	
-	
+	display: none;		
+}
+
+div.wpnbm {
+
 }
 
 div.wpnbm select {
@@ -43,6 +46,7 @@ div.role-data {
 
 	float: left;
 	min-width: 400px;
+	min-height: 200px;
 	
 }
 
@@ -50,6 +54,7 @@ div.use-data {
 	
 	float: left;
 	min-width: 400px;
+		min-height: 200px;
 }
 
 div.buttons {

@@ -13,7 +13,7 @@ This plugin will collect and store metadata about blogs on a network install of 
 * ~~Fix the use column to appear only after initial role selection~~
 * Standardize classes and values (use of hyphens and underscores, match to table column names)
 * ~~Save form to table~~
-* Retrieve form values from table if already submitted
+* ~~Retrieve form values from table if already submitted~~
 * Network Admin Menu to list the questions that are active
 * Network Admin Menu has option to populate the table with null values for existing blogs
 * Hook into WP Blog registration form
