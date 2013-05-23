@@ -42,14 +42,6 @@ License: GPL2 ? Which is best?
 
 
 /*
-
-
-If we have populated answers, then we can always just not apply the css to hide the questions that shouldn't be available.
-
-
-*/
-
-/*
 http://codex.wordpress.org/Function_Reference/register_activation_hook
 <?php register_activation_hook( $file, $function ); ?> 
 
@@ -64,55 +56,23 @@ I'm opting to store the information in a separate table as we discussed. At leas
 ***/
 
 add_action( 'admin_init', 'nbm_admin_init' );
-add_action( 'admin_menu', 'nbm_admin_menu' );
-add_action('network_admin_menu', 'nbm_network_admin_menu');
-
-function nbm_network_admin_menu() {
-	
-	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data.png' );
-	
-}
+add_action( 'admin_menu', 'nbm_admin_menu' );						// Adds the Admin Menu for each blog
 
 
-function nbm_populate_null() {
-	// Function populates null values in the wp_wpnbm_data table for each blog that doesn't exist in there.
-	// I can hook this into an install function later.
-	
-	global $wpdb;
-	$tablename = $wpdb->prefix . "wpnbm_data";
-	
-	$sql = 'SELECT * from ' . $tablename;
-	$data = $wpdb->get_results($sql, ARRAY_A);
 
-	$sql = 'SELECT `blog_id` from wp_blogs';
-	$ids = $wpdb->get_results($sql, ARRAY_N);
-	array_walk($ids,'flatten_array');
-	$ids = array_flip($ids);
+/*********** 
+For extending the site-new.php page 
+***********/
 
-	foreach ($data as $datum) :
-		if ( in_array( $datum['blog_id'] , array_keys($ids) )) :
-			unset($ids[$datum['blog_id']]);
-		endif;
-	endforeach;
-	$ids = array_flip($ids);
-	$count = 0;
-	foreach ( $ids as $id ) :
-		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
-		$result = $wpdb->get_results($sql);
-		$count++;
-	endforeach;
-	
-	
-	echo '<div class="updated">' . $count . ' blogs with null values added into the database.</div>';
-		
-}
 // Only add the script for the page site-new.php (the page hook).
-add_action( "admin_print_scripts-site-new.php", 'my_admin_scripts' );
+add_action( 'admin_print_scripts-site-new.php', 'my_admin_scripts' );
+add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Hooks into the register a new blog page
 
 function my_admin_scripts() {
     wp_register_script('sign-up-extend', plugins_url('alter-sign-up.js', __FILE__));
     wp_enqueue_script('sign-up-extend');
 }
+
 function add_new_blog_field($blog_id, $user_id, $domain, $path, $site_id, $meta) {
 
     // Make sure the user can perform this action and the request came from the correct page.
@@ -121,11 +81,6 @@ function add_new_blog_field($blog_id, $user_id, $domain, $path, $site_id, $meta)
 	switch_to_blog($blog_id);
    
 	$path = $path . 'wp-admin/admin.php?page=nbm_answers';
-//	wp_redirect($path);
-//	exit;
-				
-//	echo "What what?";
-//	http://localhost/~Sven/invest/onemoretimea/
 
     // Use a default value here if the field was not submitted.
     $new_field_value = 'default';
@@ -139,11 +94,14 @@ function add_new_blog_field($blog_id, $user_id, $domain, $path, $site_id, $meta)
     restore_current_blog();
 }
 
-add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6);
+/***********
+For the Network Admin Menu 
+**********/
 
-function flatten_array(&$item) {
+add_action('network_admin_menu', 'nbm_network_admin_menu');			// Adds the Network Admin Menu
 
-	$item = $item[0];
+function nbm_network_admin_menu() {									// Hook to add in the Network Admin Menu
+	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', '../wp-content/plugins/network-blog-metadata/images/data.png' );
 	
 }
 
@@ -201,68 +159,74 @@ This is a network admin menu page. Reports and other things will be added here s
 <?php	
 }
 
-function nbm_admin_init() {
-    /* Register our script. */
+
+function nbm_populate_null() {
+	// Function populates null values in the wp_wpnbm_data table for each blog that doesn't exist in there.
+	// I can hook this into an install function later.
+	
+	global $wpdb;
+	$tablename = $wpdb->prefix . "wpnbm_data";
+	
+	$sql = 'SELECT * from ' . $tablename;
+	$data = $wpdb->get_results($sql, ARRAY_A);
+
+	$sql = 'SELECT `blog_id` from wp_blogs';
+	$ids = $wpdb->get_results($sql, ARRAY_N);
+	array_walk($ids,'flatten_array');
+	$ids = array_flip($ids);
+
+	foreach ($data as $datum) :
+		if ( in_array( $datum['blog_id'] , array_keys($ids) )) :
+			unset($ids[$datum['blog_id']]);
+		endif;
+	endforeach;
+	$ids = array_flip($ids);
+	$count = 0;
+	foreach ( $ids as $id ) :
+		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
+		$result = $wpdb->get_results($sql);
+		$count++;
+	endforeach;
+	
+	echo '<div class="updated fade">' . $count . ' blogs with null values added into the database.</div>';
+		
+}
+
+function flatten_array(&$item) { 				// Quick helper function to deal with arrays from the reports
+
+	$item = $item[0];
+	
+}
+
+
+
+
+
+
+/***********
+For the per-site Admin Menu
+***********/
+
+function nbm_admin_init() {				// Registers the javascript and css for the per-site Admin Menu
     wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
     wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
 
 }
 
-function nbm_admin_menu() {
-    /* Add our plugin submenu and administration screen */
-    $page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data.png' );
-
-    /*
-      * Use the retrieved $page_hook_suffix to hook the function that links our script.
-      * This hook invokes the function only on our plugin administration screen,
-      * see: http://codex.wordpress.org/Administration_Menus#Page_Hook_Suffix
-      */
-    add_action('admin_print_scripts-' . $page_hook_suffix, 'nbm_admin_scripts');
-}
-
-function nbm_admin_scripts() {
-    /* Link our already registered script to a page */
+function nbm_admin_scripts() {			// Enqueues the javascript and css for the per-site Admin Menu
     wp_enqueue_script( 'hide-field-js' );
 	wp_enqueue_style( 'hide-questions' );
 }
 
-function nbm_create_table() {
+function nbm_admin_menu() {				// Hooks into the dashboard to create the per-site Admin Menu
+    /* Add our plugin submenu and administration screen */
+    $page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data.png' );
 
-	   global $wpdb;
-
-	   $tablename = $wpdb->base_prefix . "wpnbm_data"; 
-	
-	
-$sql = "CREATE TABLE $tablename (
-		  `blog_id` INT NOT NULL ,
-		  `user_role` VARCHAR(45) NULL ,
-		  `blog_intended_use` VARCHAR(45) NULL ,
-		  `course_title` VARCHAR(128) NULL ,
-		  `course_number` VARCHAR(45) NULL ,
-		  `course_enrollment` INT NULL ,
-		  `course_multiple_section` BINARY NULL ,
-		  `course_writing_intensive` BINARY NULL ,
-		  `course_interactive` VARCHAR(45) NULL ,
-		  `visibility` VARCHAR(45) NULL ,
-		  `research_area` VARCHAR(128) NULL ,
-		  `portfolio_professional` BINARY NULL ,
-		  `portfolio_content_type` VARCHAR(128) NULL ,
-		  `student_level` VARCHAR(20) NULL ,
-		  `student_major` VARCHAR(128) NULL ,
-		  `person_department` VARCHAR(128) NULL ,
-		  `class_project_course` VARCHAR(128) NULL ,
-		  `class_project_description` MEDIUMTEXT NULL ,
-		  PRIMARY KEY (`blog_id`) ,
-		  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
-		);";
-
-
-	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-	dbDelta( $sql );
+    add_action('admin_print_scripts-' . $page_hook_suffix, 'nbm_admin_scripts');
 }
-	
 
-function nbm_manage_menu() {
+function nbm_manage_menu() {			// Function that processes the form variables for the per-site Admin Menu
+										// it also calls on the function to write the content of the per-site Admin Menu
 
 	   	global $wpdb;
 
@@ -279,7 +243,7 @@ function nbm_manage_menu() {
 
 		$row_exists = $wpdb->get_var('SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id);
 
-    if ( $_SERVER["REQUEST_METHOD"] == "POST" ){ // For processing the form if submitted
+    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) : // For processing the form if submitted
 
 		// Start processing the data in order to put into a SQL Query	
 		foreach ($_POST as $key => $val) :
@@ -343,16 +307,61 @@ function nbm_manage_menu() {
 
 
 		$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
-		echo '<div class="updated">Thank you for submitting the metadata.</div>';
-		print_nbm_data();
+		echo '<div class="updated fade">Thank you for submitting the metadata.</div>';
+		print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
 	 
-
-    } else {
-	 print_nbm_data();
-	}
+    else :
+		print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
+	endif;
 }
 
-function print_nbm_data() {
+function nbm_create_table() {				// Function to create the data table
+
+	/* This should be part of an install hook */
+
+	   global $wpdb;
+
+	   $tablename = $wpdb->base_prefix . "wpnbm_data"; 
+	
+	
+$sql = "CREATE TABLE $tablename (
+		  `blog_id` INT NOT NULL ,
+		  `user_role` VARCHAR(45) NULL ,
+		  `blog_intended_use` VARCHAR(45) NULL ,
+		  `course_title` VARCHAR(128) NULL ,
+		  `course_number` VARCHAR(45) NULL ,
+		  `course_enrollment` INT NULL ,
+		  `course_multiple_section` BINARY NULL ,
+		  `course_writing_intensive` BINARY NULL ,
+		  `course_interactive` VARCHAR(45) NULL ,
+		  `visibility` VARCHAR(45) NULL ,
+		  `research_area` VARCHAR(128) NULL ,
+		  `portfolio_professional` BINARY NULL ,
+		  `portfolio_content_type` VARCHAR(128) NULL ,
+		  `student_level` VARCHAR(20) NULL ,
+		  `student_major` VARCHAR(128) NULL ,
+		  `person_department` VARCHAR(128) NULL ,
+		  `class_project_course` VARCHAR(128) NULL ,
+		  `class_project_description` MEDIUMTEXT NULL ,
+		  PRIMARY KEY (`blog_id`) ,
+		  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
+		);";
+
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+}
+	
+
+
+
+function print_nbm_data() {					// Function that prints the per-site Admin Menu
+	
+	//	I need to reimplement this for security reasons
+	//
+	//	if ( !current_user_can( 'manage_options' ) )  {
+	//		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+	//	}
 	
    	global $wpdb, $blog_id;
 	
@@ -373,14 +382,12 @@ function print_nbm_data() {
 			$sql = 	'SELECT * from ' . $tablename .
 					' WHERE `blog_id` = ' . $blog_id;
 					
-			$data = $wpdb->get_row($sql , ARRAY_A); // get_row method works here because there is only ever one row that matches.
+			$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
 
 	?>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 		<div class="wpnbm">
 			<p>Please take a moment to tell us a little bit about your <b>Blogs @ Baruch site</b>. This information will be available only to the <b>B@B</b> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users.</p>
-
-
 			<div class="role-data"> <?php 	// Start left column ?>
 				<div id="role" name="role">
 					<h3>Who are you?</h3>
@@ -527,66 +534,5 @@ function print_nbm_data() {
 	</form>
 	<?php
 }
-
-function nbm_menu() {
-	// Add the new admin menu and page and save the returned hook suffix
-	$hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_options', 'wp-content/plugins/network-blog-metadata/images/data.png' );
-	
-	// Use the hook suffix to compose the hook and register an action executed when plugin's options page is loaded
-	add_action( 'load-' . $hook_suffix , 'nbm_load_function' );
-	
-
-}
-
-function nbm_options() {
-//	if ( !current_user_can( 'manage_options' ) )  {
-	//		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
-//	}
-
-
-	echo '<div class="wrap">';
-	echo '<p>Here is where the form would go if I actually had options.</p>';
-	echo '</div>';
-}
-/*
-function nbm_admin_notices() {
-	echo "<div id='notice' class='updated fade'><p>My Plugin is not configured yet. Please do it now.</p></div>\n";
-}
-
-function nbm_load_function() {
-	// Current admin page is the options page for our plugin, so do not display the notice
-	// (remove the action responsible for this)
-	remove_action( 'admin_notices', 'nbm_admin_notices' );
-}
-
-*/
-
-/* Table Schema
-
-Change "invest" to database name and add prefix
-
-CREATE  TABLE `invest`.`nbm-data` (
-  `blog_id` INT NOT NULL ,
-  `user_role` VARCHAR(45) NULL ,
-  `blog_intended_use` VARCHAR(45) NULL ,
-  `course_title` VARCHAR(128) NULL ,
-  `course_number` VARCHAR(45) NULL ,
-  `course_enrollment` INT NULL ,
-  `course_multiple_section` BINARY NULL ,
-  `course_writing_intensive` BINARY NULL ,
-  `course_interactive` VARCHAR(45) NULL ,
-  `visibility` VARCHAR(45) NULL ,
-  `research_area` VARCHAR(128) NULL ,
-  `portfolio_professional` BINARY NULL ,
-  `portfolio_content_type` VARCHAR(128) NULL ,
-  `student_level` VARCHAR(20) NULL ,
-  `student_major` VARCHAR(128) NULL ,
-  `person_department` VARCHAR(128) NULL ,
-  `class_project_course` VARCHAR(128) NULL ,
-  `class_project_description` MEDIUMTEXT NULL ,
-  PRIMARY KEY (`blog_id`) ,
-  UNIQUE INDEX `blog_id_UNIQUE` (`blog_id` ASC) );
-
-*/
 
 ?>
