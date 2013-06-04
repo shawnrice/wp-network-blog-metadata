@@ -15,12 +15,11 @@ This plugin will collect and store metadata about blogs on a network install of 
 * ~~Retrieve form values from table if already submitted~~
 * ~~Network Admin Menu has option to populate the table with null values for existing blogs~~
 * ~~Fix UI in the menu so that questions don't jump around in such an ugly way when changing selections~~
-* Write SQL for a sharded database
 * Network Admin Menu to list the questions that are active
 * Add in development comments
-* Hook into WP Blog registration form
+* ~~Hook into WP Blog registration form~~
 * Convert admin menu form submission to an ajax callback function (_is this necessary?_)
-* Standardize classes and values (use of hyphens and underscores, match to table column names)
+* ~~Standardize classes and values (use of hyphens and underscores, match to table column names)~~
 * Test to make sure there are no conflicts with BuddyPress
 * Test for cross-browser compatibility
 * Finish writing roadmap
@@ -49,7 +48,3 @@ The following features will be created for v2.0, which will be abstracted so tha
 	* Google Charts (https://developers.google.com/chart/)
 	* gRaphael (http://g.raphaeljs.com/)
 	* Flotcharts (http://www.flotcharts.org/)
-
-# Database
-
-* Perhaps there should be an auto-detected option to see if the database is sharded and automatically use appropriate sql statements.
