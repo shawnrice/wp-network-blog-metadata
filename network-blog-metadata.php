@@ -58,7 +58,30 @@ I'm opting to store the information in a separate table as we discussed. At leas
 add_action( 'admin_init', 'nbm_admin_init' );
 add_action( 'admin_menu', 'nbm_admin_menu' );						// Adds the Admin Menu for each blog
 
+// Add text field on blog signup form
+add_action( 'signup_blogform', 'add_extra_field_on_blog_signup');
+add_action( "admin_print_scripts-site-new.php", "add_extra_field_on_blog_signup" );
 
+function add_extra_field_on_blog_signup() { 
+	wp_enqueue_script( 'jQuery');
+	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
+	wp_enqueue_style( 'hide-questions' );
+}
+
+// Append the submitted value of our custom input into the meta array that is stored while the user doesn't activate
+add_filter('add_signup_meta', 'append_extra_field_as_meta');
+function append_extra_field_as_meta($meta) {
+    if(isset($_REQUEST['extra_field'])) {
+        $meta['extra_field'] = $_REQUEST['extra_field'];
+    }
+    return $meta;
+}
+
+// When the new site is finally created (user has followed the activation link provided via e-mail), add a row to the options table with the value he submitted during signup
+add_action('wpmu_new_blog', 'process_extra_field_on_blog_signup', 10, 6);
+function process_extra_field_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id, $meta) {
+    update_blog_option($blog_id, 'extra_field', $meta['extra_field']);
+}
 
 /*********** 
 For extending the site-new.php page 
@@ -71,14 +94,14 @@ add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Hooks into the 
 
 
 function my_admin_scripts() {
-    wp_register_script('sign-up-extend', plugins_url('js/alter-sign-up.js', __FILE__));
-    wp_enqueue_script('sign-up-extend');
+   wp_register_script('sign-up-extend', plugins_url('js/alter-sign-up.js', __FILE__));
+   wp_enqueue_script('sign-up-extend');
 
-	wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
-	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
+//	wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
+//	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
 
-    wp_enqueue_script( 'hide-field-js' );
-	wp_enqueue_style( 'hide-questions' );
+  //  wp_enqueue_script( 'hide-field-js' );
+//	wp_enqueue_style( 'hide-questions' );
 
 }
 
