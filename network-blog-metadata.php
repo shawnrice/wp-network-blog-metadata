@@ -68,31 +68,55 @@ For extending the site-new.php page
 add_action( 'admin_print_scripts-site-new.php', 'my_admin_scripts' );
 add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Hooks into the register a new blog page
 
+
+
 function my_admin_scripts() {
-    wp_register_script('sign-up-extend', plugins_url('alter-sign-up.js', __FILE__));
+    wp_register_script('sign-up-extend', plugins_url('js/alter-sign-up.js', __FILE__));
     wp_enqueue_script('sign-up-extend');
+
+	wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
+	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
+
+    wp_enqueue_script( 'hide-field-js' );
+	wp_enqueue_style( 'hide-questions' );
+
 }
 
-function add_new_blog_field($blog_id, $user_id, $domain, $path, $site_id, $meta) {
-
-    // Make sure the user can perform this action and the request came from the correct page.
-//	global $blog_id;
-
-	switch_to_blog($blog_id);
-   
-	$path = $path . 'wp-admin/admin.php?page=nbm_answers';
-
-    // Use a default value here if the field was not submitted.
+function add_new_blog_field( $blog_id, $user_id, $domain, $path, $site_id, $meta )
+{
+	
     $new_field_value = 'default';
+    // Site added in the back end
+    if( !empty( $_POST['blog']['site_category'] ) )
+    {
+        switch_to_blog( $blog_id );
+        $new_field_value = $_POST['blog']['site_category'];
+        update_option( 'site_category', $new_field_value );
 
-    if ( !empty($_POST['blog']['new_field']) )
-        $new_field_value = $_POST['blog']['new_field'];
-
-    // save option into the database
-    update_option( 'new_field', $new_field_value);
-
-    restore_current_blog();
+        restore_current_blog();
+    }
+    // Site added in the front end
+    elseif( !empty( $meta['site_category'] ) )
+    {
+        $new_field_value = $meta['site_category'];
+        update_option( 'site_category', $new_field_value );
+    }
 }
+
+function print_sign_up_page($buffer) {
+
+?>
+Hello?
+<script>
+	(function($) {
+	    $(document).ready(function() {
+	        $(<?php echo $buffer; ?>).insertAfter('#wpbody-content table tr:eq(2)');
+	    });
+	})(jQuery);	
+</script>
+<?	
+}
+
 
 /***********
 For the Network Admin Menu 
@@ -226,10 +250,8 @@ function nbm_admin_menu() {				// Hooks into the dashboard to create the per-sit
 }
 
 function nbm_manage_menu() {			// Function that processes the form variables for the per-site Admin Menu
-										// it also calls on the function to write the content of the per-site Admin Menu
-
+										// it also calls on the function to write the content of the per-site Admin Men
 	   	global $wpdb;
-
 	   	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
 	
 		// These next calls should be coming from the network admin on an install script or activation script or something like that...
@@ -308,51 +330,22 @@ function nbm_manage_menu() {			// Function that processes the form variables for
 
 		$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
 		echo '<div class="updated fade">Thank you for submitting the metadata.</div>';
-		print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
-	 
+		$buffer = print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
+	 	echo $buffer;
     else :
-		print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
+		$buffer = print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
+		echo $buffer;
 	endif;
 }
 
-function nbm_create_table() {				// Function to create the data table
 
-	/* This should be part of an install hook */
-
-	   global $wpdb;
-
-	   $tablename = $wpdb->base_prefix . "wpnbm_data"; 
 	
-	
-$sql = "CREATE TABLE $tablename (
-		  `blog_id` INT NOT NULL ,
-		  `user_role` VARCHAR(45) NULL ,
-		  `blog_intended_use` VARCHAR(45) NULL ,
-		  `course_title` VARCHAR(128) NULL ,
-		  `course_number` VARCHAR(45) NULL ,
-		  `course_enrollment` INT NULL ,
-		  `course_multiple_section` BINARY NULL ,
-		  `course_writing_intensive` BINARY NULL ,
-		  `course_interactive` VARCHAR(45) NULL ,
-		  `visibility` VARCHAR(45) NULL ,
-		  `research_area` VARCHAR(128) NULL ,
-		  `portfolio_professional` BINARY NULL ,
-		  `portfolio_content_type` VARCHAR(128) NULL ,
-		  `student_level` VARCHAR(20) NULL ,
-		  `student_major` VARCHAR(128) NULL ,
-		  `person_department` VARCHAR(128) NULL ,
-		  `class_project_course` VARCHAR(128) NULL ,
-		  `class_project_description` MEDIUMTEXT NULL ,
-		  PRIMARY KEY (`blog_id`) ,
-		  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
-		);";
+/* 
 
+	Function to print the data/form
+	There should be a derivative function to call just the form so that we needn't parse through things on the add new site page.
 
-	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-	dbDelta( $sql );
-}
-	
-
+*/
 
 
 function print_nbm_data() {					// Function that prints the per-site Admin Menu
@@ -364,7 +357,6 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 	//	}
 	
    	global $wpdb, $blog_id;
-	
    	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
 	
 	
@@ -384,6 +376,7 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 					
 			$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
 
+	ob_start();
 	?>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 		<div class="wpnbm">
@@ -462,7 +455,7 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 						<option<?php if ($data['student_major'] == "Finance") echo " selected";?>>Finance</option>
 						<option<?php if ($data['student_major'] == "Graphic Communication") echo " selected";?>>Graphic Communication</option>
 						<option<?php if ($data['student_major'] == "History") echo " selected";?>>History</option>
-						<option>Industrial/Organizational Psychology</option>
+						<option<?php if ($data['student_major'] == "Industrial/Organizational Psychology") echo " selected";?>>Industrial/Organizational Psychology</option>
 						<option<?php if ($data['student_major'] == "International Business") echo " selected";?>>International Business</option>
 						<option<?php if ($data['student_major'] == "Journalism") echo " selected";?>>Journalism</option>
 						<option<?php if ($data['student_major'] == "Management") echo " selected";?>>Management</option>
@@ -517,7 +510,6 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 <?php
 						$blog_intended_use = $data['blog_intended_use'];
 						$uses = array('course_website' , 'personal' , 'porfolio' , 'research' , 'other');?>
-						 echo "Regular use!<br/>";?>
 						<option value="other"<?php if (!(in_array($blog_intended_use, $uses))) echo ' selected';?>>Other</option>
 					</select>
 					<br />
@@ -532,7 +524,64 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 			<input type="submit" />
 		</div>
 	</form>
+	
 	<?php
+	$buffer = ob_get_contents();
+  	ob_end_clean();
+
+	return $buffer;
+
 }
 
-?>
+
+function nbm_create_table() {				// Function to create the data table
+	
+   global $wpdb;
+   $tablename = $wpdb->base_prefix . "wpnbm_data"; // General tablename
+	
+	// Hard coded table, for now.
+	$sql = "CREATE TABLE $tablename (
+			  `blog_id` INT NOT NULL ,
+			  `user_role` VARCHAR(45) NULL ,
+			  `blog_intended_use` VARCHAR(45) NULL ,
+			  `course_title` VARCHAR(128) NULL ,
+			  `course_number` VARCHAR(45) NULL ,
+			  `course_enrollment` INT NULL ,
+			  `course_multiple_section` BINARY NULL ,
+			  `course_writing_intensive` BINARY NULL ,
+			  `course_interactive` VARCHAR(45) NULL ,
+			  `visibility` VARCHAR(45) NULL ,
+			  `research_area` VARCHAR(128) NULL ,
+			  `portfolio_professional` BINARY NULL ,
+			  `portfolio_content_type` VARCHAR(128) NULL ,
+			  `student_level` VARCHAR(20) NULL ,
+			  `student_major` VARCHAR(128) NULL ,
+			  `person_department` VARCHAR(128) NULL ,
+			  `class_project_course` VARCHAR(128) NULL ,
+			  `class_project_description` MEDIUMTEXT NULL ,
+			  PRIMARY KEY (`blog_id`) ,
+			  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
+			);";
+
+
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' ); // This is currently a placeholder. We need to implement a versioned dataschema for an upgrade path. 
+		dbDelta( $sql );
+}
+
+
+function on_activation()
+{
+   if( !is_multisite() )
+       wp_die( 'This plugin is available only for multisite installations.' );
+
+	global $wpdb;
+	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
+
+	$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
+	if (empty($table_exists)) : // Just make sure that the table doesn't exist already.
+	nbm_create_table();
+	endif;
+
+// The populate null values script could go here...
+
+}
