@@ -62,7 +62,7 @@ add_action( 'admin_menu', 'nbm_admin_menu' );						// Adds the Admin Menu for ea
 add_action( 'signup_blogform', 'add_extra_field_on_blog_signup');
 add_action( "admin_print_scripts-site-new.php", "add_extra_field_on_blog_signup" );
 
-function add_extra_field_on_blog_signup() { 
+function add_extra_field_on_blog_signup() { // Pulls in the javascript to control the sign-up the blog form...
 	wp_enqueue_script( 'jQuery');
 	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
 	wp_enqueue_style( 'hide-questions' );
@@ -80,7 +80,85 @@ function append_extra_field_as_meta($meta) {
 // When the new site is finally created (user has followed the activation link provided via e-mail), add a row to the options table with the value he submitted during signup
 add_action('wpmu_new_blog', 'process_extra_field_on_blog_signup', 10, 6);
 function process_extra_field_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id, $meta) {
-    update_blog_option($blog_id, 'extra_field', $meta['extra_field']);
+//    update_blog_option($blog_id, 'extra_field', $meta['extra_field']);
+
+		   	global $wpdb;
+		   	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
+
+			// These next calls should be coming from the network admin on an install script or activation script or something like that...
+			// The creation of the table shouldn't exist in the regular user admin menus
+			$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
+			if (empty($table_exists)) :
+				nbm_create_table();
+			endif;
+
+//			global $blog_id;
+
+			$row_exists = $wpdb->get_var('SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id);
+
+	    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) : // For processing the form if submitted
+
+			// Start processing the data in order to put into a SQL Query	
+			foreach ($_POST as $key => $val) :
+				if (!($val == NULL)) :
+					$_POST[$key] = '"' . $val . '"';
+				else : 
+					$_POST[$key] = "NULL";
+				endif;
+			endforeach;
+
+			if ($_POST['course_website'] == '"Yes"') :
+				$purpose = '"course_website"';
+			elseif ($_POST['purpose'] == '"other"') :
+				$purpose = $_POST['use_other'];
+			else :
+				$purpose = $_POST['purpose'];
+			endif;
+
+			// Finished replacing values within the $_POST array in order to insert the correct ones.
+			if (!(empty($row_exists))) :
+				$sql = 'UPDATE ' . $tablename . ' 
+						SET 
+						`user_role` = ' . $_POST["role"] . ',
+						`blog_intended_use` = ' . $purpose . ',
+						`course_title` = ' . $_POST["course_name"] . ',
+						`course_number` = ' . $_POST["course_number"] . ',
+						`course_enrollment` = NULL,
+						`course_multiple_section` = NULL,
+						`course_writing_intensive` = NULL,
+						`course_interactive` = NULL,
+						`visibility` = NULL,
+						`research_area` = NULL,
+						`portfolio_professional` = NULL,
+						`portfolio_content_type` = NULL,
+						`student_level` = NULL,
+						`student_major` = ' . $_POST["major"] . ',
+						`person_department` = ' . $_POST["department"] . ',
+						`class_project_course` = NULL,
+						`class_project_description` = NULL  WHERE `blog_id` = ' . $blog_id;
+			else :
+				$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
+						$blog_id . ', ' .
+						$_POST["role"] . ', ' .
+						$purpose . ', ' .
+						$_POST["course_name"] . ', ' .
+						$_POST["course_number"] . ', ' . '
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						`student_major` = ' . $_POST["major"] . ', 
+						`person_department` = ' . $_POST["department"] . ', 
+						NULL,
+						NULL)';
+			endif;
+			$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
+		endif;
 }
 
 /*********** 
@@ -126,19 +204,6 @@ function add_new_blog_field( $blog_id, $user_id, $domain, $path, $site_id, $meta
     }
 }
 
-function print_sign_up_page($buffer) {
-
-?>
-Hello?
-<script>
-	(function($) {
-	    $(document).ready(function() {
-	        $(<?php echo $buffer; ?>).insertAfter('#wpbody-content table tr:eq(2)');
-	    });
-	})(jQuery);	
-</script>
-<?	
-}
 
 
 /***********
@@ -410,13 +475,16 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 
 					<div class="question">
 					<span style="margin: 0px 0px 5px -5px;">I'm a ...</span><br />
-						<input type="radio" name="role" value="professor"<?php if ($data['user_role'] == 'professor') echo ' checked';?>> Professor<br />
-						<input type="radio" name="role" value="student"<?php if ($data['user_role'] == 'student') echo ' checked';?>> Student<br />
-						<input type="radio" name="role" value="staff"<?php if ($data['user_role'] == 'staff') echo ' checked';?>> Staff<br />
+						<select name="role">
+							<option value="">---</option>
+							<option<?php if ($data['user_role'] == 'Professor') echo ' selected';?>>Professor</option>
+							<option<?php if ($data['user_role'] == 'Student') echo ' selected';?>>Student</option>
+							<option<?php if ($data['user_role'] == 'Staff') echo ' selected';?>>Staff</option>
+						</select>
 					</div>
 				</div>
 
-				<div id="department" class="<?php if (!(($data['user_role'] =='professor') || ($data['user_role'] == 'staff'))) echo 'hide_question '; ?>professor-staff question">
+				<div id="department" class="<?php if (!(($data['user_role'] == 'Professor') || ($data['user_role'] == 'Staff'))) echo 'hide_question '; ?>professor-staff question">
 					What department are you in?<br />
 						<select name="department" class="professor-staff">
 							<option value="">---</option>
@@ -457,9 +525,9 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 						</select>
 				</div>
 
-				<div  class="hide_question student question">
+				<div class="<?php if (!($data['user_role'] == 'Student')) echo 'hide_question ';?> student question">
 					What is your major?<br />
-					<select name="major" class="<?php if (!($data['user_role'] =='student')) echo 'hide_question'; ?>student">
+					<select name="major" class="<?php if (!($data['user_role'] == 'Student')) echo 'hide_question ';?>student">
 						<option value="">---</option>
 						<option<?php if ($data['student_major'] == "Undeclared") echo " selected";?>>Undeclared</option>
 						<option<?php if ($data['student_major'] == "Accountancy") echo " selected";?>>Accountancy</option>
@@ -504,26 +572,26 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 	
 			<div class="<?php if (!($data['user_role'])) echo 'hide_question ';?>use-data temp"> <?php 	// Start right column ?>
 			<h3>Using this site</h3>
-				<div class="<?php if (!($data['user_role'] =='professor')) echo 'hide_question '; ?>professor question">
+				<div class="<?php if (!($data['user_role'] == 'Professor')) echo 'hide_question '; ?>professor question">
 					Is this a course website? <br />
 					<select name="course_website" class="professor">
 						<option value="">---</option>
 						<option<?php if ($data['blog_intended_use'] == 'course_website') echo ' selected';?>>Yes</option>
-						<option<?php if (($data['user_role'] == 'professor') && (!(is_null($data['blog_intended_use']))) && ($data['blog_intended_use'] != 'course_website')) echo ' selected';?>>No</option>
+						<option<?php if (($data['user_role'] == 'Professor') && (!(is_null($data['blog_intended_use']))) && ($data['blog_intended_use'] != 'course_website')) echo ' selected';?>>No</option>
 					</select>
 				</div>
 
-				<div class="<?php if (!(($data['user_role'] =='professor') && ($data['blog_intended_use']== 'course_website'))) echo 'hide_question '; ?>course_website question">
+				<div class="<?php if (!(($data['user_role'] == 'Professor') && ($data['blog_intended_use'] == 'course_website'))) echo 'hide_question '; ?>course_website question">
 					Course Name:
-					<input type="text" name="course_name" class="course_website" size="38">
+					<input type="text" name="course_name" class="course_website professor" size="38"<?php if ($data['course_title']) echo 'value="'.$data['course_title'].'"';?>>
 				</div>
 
-				<div class="<?php if (!(($data['user_role'] =='professor') && ($data['blog_intended_use']== 'course_website'))) echo 'hide_question '; ?>course_website question">
+				<div class="<?php if (!(($data['user_role'] == 'Professor') && ($data['blog_intended_use']== 'course_website'))) echo 'hide_question '; ?>course_website question">
 					Course Number (and section if you have it):
-					<input type="text" name="course_number" class="course_website" size="16">
+					<input type="text" name="course_number" class="course_website professor" size="16"<?php if ($data['course_number']) echo 'value="'.$data['course_number'].'"';?>>
 				</div>
 
-				<div class="<?php if (($data['user_role'] =='professor') && ($data['blog_intended_use']== 'course_website')) echo 'hide_question '; ?>purpose question">
+				<div class="<?php if (($data['user_role'] == 'Professor') && ($data['blog_intended_use']== 'course_website')) echo 'hide_question '; ?>purpose question">
 					What is the primary use for this blog?<br />
 					<select name="purpose">
 						<option value="">---</option>

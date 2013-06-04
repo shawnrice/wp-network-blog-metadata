@@ -1,80 +1,76 @@
-/*! jQuery script to hide certain form fields */
+/*! $ script to hide certain form fields */
 
-jQuery(document).ready(function() {
+(function($) {
+	$(document).ready(function() {
+		$('select[name="role"]').change(function() {
+			if ($(this).val() === "Professor") {
+				$('.student , .staff , .purpose').fadeOut(200);
+				$('.student , .staff , .purpose select').val('');
+				setTimeout(function(){
+						$('.professor , .professor-staff').fadeIn(200);}, 200);
+			}
+			else if ($(this).val() === "Student") {
+				$('.professor , .staff, .professor-staff , .course_website').fadeOut(200);
+				// Reset some values if they were put in...
+				$('.professor , .staff , .professor-staff , course_website input').val('');
+				$('.professor , .professor-staff select').val('');
 
-jQuery('input[name="role"]').change(function() {
-	
-	if (jQuery(this).val() === "professor") {
-		jQuery('.student , .staff , .purpose').fadeOut(200);
-		jQuery('.student , .staff , .purpose select').val('---');
-		
-		setTimeout(function(){
-				jQuery('.professor , .professor-staff').fadeIn(200);}, 200);		
-	}
-	else if (jQuery(this).val() === "student") {
-		jQuery('.professor , .staff, .professor-staff , .course_website').fadeOut(200);
-		// Reset some values if they were put in...
-		jQuery('.professor , .staff , .professor-staff , course_website input').val('');
-		jQuery('.professor , .professor-staff select').val('---');
+				setTimeout(function(){
+					$('.student , .purpose').fadeIn(200);}, 200);
+			}
+			else if ($(this).val() === "Staff") {
+				$('.professor , .student').fadeOut(200);		
+				// Reset some values if they were put in...
+				$('.course_website , .professor , .student input').val('');
+				$('.course_website , .student select').val('');
+				setTimeout(function(){
+					$('.staff , .professor-staff , .purpose').fadeIn(200);}, 200);
 
-		setTimeout(function(){
-			jQuery('.student , .purpose').fadeIn(200);}, 200);
-	}
-	else if (jQuery(this).val() === "staff") {
-		jQuery('.professor , .student').fadeOut(200);		
-		// Reset some values if they were put in...
-		jQuery('.course_website , .professor , .student input').val('');
-		jQuery('.course_website , .student select').val('');
-		setTimeout(function(){
-			jQuery('.staff , .professor-staff , .purpose').fadeIn(200);}, 200);
-		
-	}
-	jQuery('.temp').fadeIn(200);
-});
+			}
+			$('.temp').fadeIn(200);
+		});
+		$('select[name="course_website"]').change(function() {
+			if ($(this).val() === "Yes") {
+				$('.purpose').fadeOut(200);
+				$('.purpose select').val('');
+				setTimeout(function(){
+					$('.course_website').fadeIn(200);}, 200);
+			}
+			else if ($(this).val() === "No") {
+				$('.course_website').fadeOut(200);
+				$('.course_website input').val('');
+				setTimeout(function(){
+					$('.purpose').fadeIn(200);}, 200);
 
-jQuery('select[name="course_website"]').change(function() {
-	if (jQuery(this).val() === "Yes") {
-		jQuery('.purpose').fadeOut(200);
-		jQuery('.purpose select').val('---');
-		setTimeout(function(){
-			jQuery('.course_website').fadeIn(200);}, 200);
-	}
-	else if (jQuery(this).val() === "No") {
-		jQuery('.course_website').fadeOut(200);
-		jQuery('.course_website input').val('');
-		setTimeout(function(){
-			jQuery('.purpose').fadeIn(200);}, 200);
+				// Reset some values if they were put in...
+			}
+			else if ($(this).val() === "") {
+				$('.course_website , .purpose').fadeOut(200);
 
-		// Reset some values if they were put in...
-	}
-	else if (jQuery(this).val() === "") {
-		jQuery('.course_website , .purpose').fadeOut(200);
-		
-		// Reset some values if they were put in...
-		jQuery('.course_website input').val('');
-		jQuery('.purpose select').val('');
-	}
-});
+				// Reset some values if they were put in...
+				$('.course_website input').val('');
+				$('.purpose select').val('');
+			}
+		});
 
-jQuery('select[name="purpose"]').change(function() {
-	if (jQuery(this).val() === "other") {
-		jQuery('.use_other , .use-other').fadeIn(200);		
-	}
-	else {
-		jQuery('.use_other').fadeOut(200);
-	}
-});
+		$('select[name="purpose"]').change(function() {
+			if ($(this).val() === "other") {
+				$('.use_other , .use-other').fadeIn(200);		
+			}
+			else {
+				$('.use_other').fadeOut(200);
+			}
+		});
+		function resetValues(type , name) {
 
-function resetValues(type , name) {
-	
-	if (type === 'input') {
-		a = type + '[name="' + name + '"]';
-		jQuery(a).attr('checked',false);
+			if (type === 'input') {
+				a = type + '[name="' + name + '"]';
+				$(a).attr('checked',false);
+			}
+			if (type === 'text') {
+				a = 'input[type=text].'+name+'';
+				$(a).val('');
+			}
+		};
 	}
-	if (type === 'text') {
-		a = 'input[type=text].'+name+'';
-		jQuery(a).val('');
-	}
-};
-
-});
+)})(jQuery);
