@@ -178,7 +178,7 @@ function my_admin_scripts() {
 //	wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
 //	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
 
-  //  wp_enqueue_script( 'hide-field-js' );
+//  wp_enqueue_script( 'hide-field-js' );
 //	wp_enqueue_style( 'hide-questions' );
 
 }
@@ -214,13 +214,18 @@ add_action('network_admin_menu', 'nbm_network_admin_menu');			// Adds the Networ
 
 function nbm_network_admin_menu() {									// Hook to add in the Network Admin Menu
 	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', '../wp-content/plugins/network-blog-metadata/images/data.png' );
-	
+
 }
 
 function nbm_network_manage_menu() {
 	global $wpdb;
 	$tablename = $wpdb->prefix . "wpnbm_data";
 	
+	wp_register_script( 'highcharts', plugins_url( '/js/highcharts/js/highcharts.js', __FILE__ ) );
+	wp_enqueue_script( 'highcharts' );
+	wp_register_script( 'charts', plugins_url( '/js/charts.js', __FILE__ ) );
+	wp_enqueue_script( 'charts' );
+		
 	if (!(empty($_POST))) :
 		if ( isset( $_POST['do_null'] ) ) :
 			nbm_populate_null();
@@ -231,6 +236,8 @@ function nbm_network_manage_menu() {
 
 	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);
 
+	$uses = array( 'course_website' => 0 , 'personal'  => 0 , 'porfolio'  => 0 , 'research'  => 0 , 'other' => 0 );
+
 	foreach ( $data as $datum ) :
 		if ( ! ( isset( $null ) ) ) $null = 0;
 		if ( ! ( isset( $student ) ) ) $student = 0;
@@ -239,17 +246,116 @@ function nbm_network_manage_menu() {
 		if ( ! ( isset( $course_website ) ) ) $course_website = 0;		
 						
 		if (is_null($datum['user_role'])) $null++;
-		if ($datum['user_role'] == 'student' ) $student++;
-		if ($datum['user_role'] == 'staff' ) $staff++;
-		if ($datum['user_role'] == 'professor' ) $professor++;
-		if ($datum['blog_intended_use'] == 'course_website' ) $course_website++;										
+		if ($datum['user_role'] == 'Student' ) $student++;
+		if ($datum['user_role'] == 'Staff' ) $staff++;
+		if ($datum['user_role'] == 'Professor' ) $professor++;
+		if ($datum['blog_intended_use'] == 'course_website' ) {
+			$course_website++;
+			$uses['course_website']++;
+		}
+		if ($datum['blog_intended_use'] == 'personal' ) $uses['personal']++;
+		if ($datum['blog_intended_use'] == 'portfolio' ) $uses['portfolio']++;
+		if ($datum['blog_intended_use'] == 'research' ) $uses['research']++;
+		if (!(in_array($datum['blog_intended_use'], $uses))) $uses['other']++;
+
 	endforeach;
+	
 	
 	$total = count($data);
 	
-?>
 
-This is a network admin menu page. Reports and other things will be added here soon. <br />
+
+?>	
+		<script type="text/javascript">
+			(function($) {
+				$(document).ready(function () {
+			        $('#users').highcharts({
+			            chart: {
+			                plotBackgroundColor: null,
+			                plotBorderWidth: null,
+			                plotShadow: false
+			            },
+			            title: {
+			                text: 'Types of Users'
+			            },
+			            tooltip: {
+			        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+			            	percentageDecimals: 1
+			            },
+			            plotOptions: {
+			                pie: {
+			                    allowPointSelect: true,
+			                    cursor: 'pointer',
+			                    dataLabels: {
+			                        enabled: true,
+			                        color: '#000000',
+			                        connectorColor: '#000000',
+			                        formatter: function() {
+			                            return '<b>'+ this.point.name +'</b>: '+ this.percentage +' %';
+			                        }
+			                    }
+			                }
+			            },
+			            series: [{
+			                type: 'pie',
+			                name: 'User Spread',
+			                data: [
+			                    ['Not Defined',   		<?php echo round((($null/$total)*100),1); ?>],
+			                    ['Professors',  <?php echo round((($professor/$total)*100),1); ?>],
+			                    ['Students',    <?php echo round((($student/$total)*100),1); ?>],
+			                    ['Staff',     	<?php echo round((($staff/$total)*100),1); ?>],
+			                ]
+			            }]
+			        });
+			    })
+			})(jQuery);
+		</script>
+			<script type="text/javascript">
+				(function($) {
+					$(document).ready(function () {
+				        $('#uses').highcharts({
+				            chart: {
+				                plotBackgroundColor: null,
+				                plotBorderWidth: null,
+				                plotShadow: false
+				            },
+				            title: {
+				                text: 'Blog Uses'
+				            },
+				            tooltip: {
+				        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+				            	percentageDecimals: 1
+				            },
+				            plotOptions: {
+				                pie: {
+				                    allowPointSelect: true,
+				                    cursor: 'pointer',
+				                    dataLabels: {
+				                        enabled: true,
+				                        color: '#000000',
+				                        connectorColor: '#000000',
+				                        formatter: function() {
+				                            return '<b>'+ this.point.name +'</b>: '+ this.percentage +' %';
+				                        }
+				                    }
+				                }
+				            },
+				            series: [{
+				                type: 'pie',
+				                name: 'Uses',
+				                data: [
+									<?php
+									foreach ($uses as $key => $val) :
+										echo '["'.$key.'",  ' . $val . '],';
+									endforeach; ?>
+				                ]
+				            }]
+				        });
+				    })
+				})(jQuery);
+			</script>
+
+<p><h2>This is a network admin menu page. Reports and other things will be added here soon.</h2></p>
 <p>There are <?php echo $total; ?> blogs in the wp_wpnbm_data table out of <?php echo $all_blogs; ?> all blogs in the system. (<?php echo round((($total/$all_blogs)*100),2); ?>%)
 <p>There are currently <?php echo $null; ?> blogs without any information entered. (<?php echo round((($null/$total)*100),2); ?>%)</p>
 <p>There are currently <?php echo $professor; ?> blogs by professors. (<?php echo round((($professor/$total)*100),2); ?>%)</p>
@@ -267,7 +373,10 @@ This is a network admin menu page. Reports and other things will be added here s
 <br />
 <br />
 <p><b>What other reports should go here? I can do a bunch. We could also turn these things into pie charts and fancy stuff.</b></p>
-
+<div>
+<div id="users" style="min-width: 400px; height: 200px; margin: 0 50px; float: left;"></div>
+<div id="uses" style="min-width: 400px; height: 200px; margin: 0 50px; float: left;"></div>
+</div>
 <?php	
 }
 
