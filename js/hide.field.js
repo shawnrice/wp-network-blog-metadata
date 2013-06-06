@@ -1,4 +1,8 @@
-/*! $ script to hide certain form fields */
+/*! $ script to hide certain form fields 
+
+	This is called on the admin menus only.
+
+*/
 
 (function($) {
 	$(document).ready(function() {

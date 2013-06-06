@@ -3,11 +3,11 @@
 /*
 Plugin Name: Network Blog Metadata
 Plugin URI: https://github.com/shawnrice/wp-network-blog-metadata
-Description: A plugin to COOLECT collect usage data about individual blogs on a network installation.
-Version: .1-alpha
+Description: A plugin to collect usage data about individual blogs on a network installation.
+Version: 0.1-alpha
 Author: Shawn Rice
 Author URI: 
-License: GPL2 ? Which is best?
+License: GPL2
 */
 
 /****														 *****
@@ -22,32 +22,36 @@ License: GPL2 ? Which is best?
 	  `blog_intended_use` VARCHAR(45) NULL ,
 	  `course_title` VARCHAR(128) NULL ,
 	  `course_number` VARCHAR(45) NULL ,
-	  `course_enrollment` INT NULL ,
-	  `course_multiple_section` BINARY NULL ,
-	  `course_writing_intensive` BINARY NULL ,
-	  `course_interactive` VARCHAR(45) NULL ,
-	  `visibility` VARCHAR(45) NULL ,
-	  `research_area` VARCHAR(128) NULL ,
-	  `portfolio_professional` BINARY NULL ,
-	  `portfolio_content_type` VARCHAR(128) NULL ,
-	  `student_level` VARCHAR(20) NULL ,
 	  `student_major` VARCHAR(128) NULL ,
 	  `person_department` VARCHAR(128) NULL ,
-	  `class_project_course` VARCHAR(128) NULL ,
-	  `class_project_description` MEDIUMTEXT NULL ,
 	</pre>
 
 *****														 *****
 *****														 *****/
 
 
-/*
-http://codex.wordpress.org/Function_Reference/register_activation_hook
-<?php register_activation_hook( $file, $function ); ?> 
+/***
 
-<?php add_action('network_admin_menu', 'function_name'); ?>
+Notes to consider for when the plugin moves to a dynamic version:
 
-*/
+--- Form creation should be available only to the network admin.
+--- Create a tabbed admin page that has the "create/edit" form and another for reports.
+--- Encode form data in json that can be retrieved by another php script
+--- Make jQuery to alter the forms interpret everything from the json
+--- Build in dependencies in the form fields and feed that in the JS; make sure that it allows for dependencies on multiple fields
+--- Do a check to see if the site is using buddypress (and/or BBpress?) or a regular WPMU to alter the add_action calls for the appropriate pages
+		--- Buddypress hijacks the registration and create new blog pages
+		--- Does BBpress?
+		--- Just do a check to see if it Buddypress and use the functions to get the register page, store that as a variable and feed that to the add_action functions
+--- Add a table to store the form structure. Should this be based on the same architecture as the wp_options page?
+
+
+--- Admin menus keep the same hooks in Buddypress and in WPMU, so those calls need not be altered.
+
+
+***/
+
+
 
 /***
 
@@ -55,32 +59,53 @@ I'm opting to store the information in a separate table as we discussed. At leas
 
 ***/
 
+/*
+
+Some BP constants to check for
+
+define ( 'BP_REGISTER_SLUG', 'signup' );
+define ( 'BP_ENABLE_MULTIBLOG', true );
+
+
+*/
+register_activation_hook( __FILE__ , 'installNBM' ); // Call to run the installation script when plugin is activated.
+
 add_action( 'admin_init', 'nbm_admin_init' );
 add_action( 'admin_menu', 'nbm_admin_menu' );						// Adds the Admin Menu for each blog
 
-// Add text field on blog signup form
-add_action( 'signup_blogform', 'add_extra_field_on_blog_signup');
+// Add form elements on blog admin dashboard screens
 add_action( "admin_print_scripts-site-new.php", "add_extra_field_on_blog_signup" );
 
-function add_extra_field_on_blog_signup() { // Pulls in the javascript to control the sign-up the blog form...
+// Add form to user registration and new blog creation for regular users
+add_action('register','add_nbm_registration_fields');
+
+
+function add_nbm_registration_fields() {
+	wp_register_script( 'sign-up-extend' , plugins_url('js/alter-sign-up.js', __FILE__));
+	wp_enqueue_script( 'sign-up-extend' );
+	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) ); // Stylesheet that just includes the way to hide the questions when not in use
+	wp_enqueue_style( 'hide-questions' );
+	
+	
+    //Get and set any values already sent
+    $user_extra = ( isset( $_POST['user_extra'] ) ) ? $_POST['user_extra'] : '';
+}
+
+// Works called during the admin menus
+// Pulls in the javascript to control the sign-up the blog form...
+function add_extra_field_on_blog_signup() {
 	wp_enqueue_script( 'jQuery');
 	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
 	wp_enqueue_style( 'hide-questions' );
+	
 }
 
-// Append the submitted value of our custom input into the meta array that is stored while the user doesn't activate
-add_filter('add_signup_meta', 'append_extra_field_as_meta');
-function append_extra_field_as_meta($meta) {
-    if(isset($_REQUEST['extra_field'])) {
-        $meta['extra_field'] = $_REQUEST['extra_field'];
-    }
-    return $meta;
-}
+
 
 // When the new site is finally created (user has followed the activation link provided via e-mail), add a row to the options table with the value he submitted during signup
-add_action('wpmu_new_blog', 'process_extra_field_on_blog_signup', 10, 6);
+add_action('wpmu_new_blog', 'process_extra_field_on_blog_signup', 10, 6);					// Dependent on a WPMU installation
+add_action('bp_core_validate_blog_signup' , 'process_extra_field_on_blog_signup', 10, 6);	// Dependent on a Buddypress installation (is this necessary?)
 function process_extra_field_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id, $meta) {
-//    update_blog_option($blog_id, 'extra_field', $meta['extra_field']);
 
 		   	global $wpdb;
 		   	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
@@ -88,117 +113,86 @@ function process_extra_field_on_blog_signup($blog_id, $user_id, $domain, $path, 
 			// These next calls should be coming from the network admin on an install script or activation script or something like that...
 			// The creation of the table shouldn't exist in the regular user admin menus
 			$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
-			if (empty($table_exists)) :
+			if (empty($table_exists)) {
 				nbm_create_table();
-			endif;
-
-//			global $blog_id;
+			}
 
 			$row_exists = $wpdb->get_var('SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id);
 
-	    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) : // For processing the form if submitted
-
+	    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) { 
+			// For processing the form if submitted
 			// Start processing the data in order to put into a SQL Query	
-			foreach ($_POST as $key => $val) :
-				if (!($val == NULL)) :
+			foreach ($_POST as $key => $val) {
+				if (!($val == NULL)) {
 					$_POST[$key] = '"' . $val . '"';
-				else : 
+				} else {
 					$_POST[$key] = "NULL";
-				endif;
-			endforeach;
+				}
+			}
 
-			if ($_POST['course_website'] == '"Yes"') :
+			if ($_POST['course_website'] == '"Yes"') {
 				$purpose = '"course_website"';
-			elseif ($_POST['purpose'] == '"other"') :
+			} else if ($_POST['purpose'] == '"other"') {
 				$purpose = $_POST['use_other'];
-			else :
+			} else {
 				$purpose = $_POST['purpose'];
-			endif;
+			}
 
 			// Finished replacing values within the $_POST array in order to insert the correct ones.
-			if (!(empty($row_exists))) :
+			if (!(empty($row_exists))) {
 				$sql = 'UPDATE ' . $tablename . ' 
 						SET 
 						`user_role` = ' . $_POST["role"] . ',
 						`blog_intended_use` = ' . $purpose . ',
 						`course_title` = ' . $_POST["course_name"] . ',
 						`course_number` = ' . $_POST["course_number"] . ',
-						`course_enrollment` = NULL,
-						`course_multiple_section` = NULL,
-						`course_writing_intensive` = NULL,
-						`course_interactive` = NULL,
-						`visibility` = NULL,
-						`research_area` = NULL,
-						`portfolio_professional` = NULL,
-						`portfolio_content_type` = NULL,
-						`student_level` = NULL,
 						`student_major` = ' . $_POST["major"] . ',
-						`person_department` = ' . $_POST["department"] . ',
-						`class_project_course` = NULL,
-						`class_project_description` = NULL  WHERE `blog_id` = ' . $blog_id;
-			else :
+						`person_department` = ' . $_POST["department"] . '
+						WHERE `blog_id` = ' . $blog_id;
+			} else {
 				$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
 						$blog_id . ', ' .
 						$_POST["role"] . ', ' .
 						$purpose . ', ' .
 						$_POST["course_name"] . ', ' .
 						$_POST["course_number"] . ', ' . '
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
-						NULL,
 						`student_major` = ' . $_POST["major"] . ', 
-						`person_department` = ' . $_POST["department"] . ', 
-						NULL,
-						NULL)';
-			endif;
+						`person_department` = ' . $_POST["department"] . ')';
+			}
 			$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
-		endif;
+		}
 }
 
+
 /*********** 
-For extending the site-new.php page 
+For extending the site-new.php page | this is an admin-menu page
 ***********/
 
 // Only add the script for the page site-new.php (the page hook).
-add_action( 'admin_print_scripts-site-new.php', 'my_admin_scripts' );
-add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Hooks into the register a new blog page
+add_action( 'admin_print_scripts-site-new.php', 'nbm_admin_scripts' );
+add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Validates the data | does it?
 
 
+/*
+function nbm_admin_scripts() {
+// Enqueues the js for the admin menu script
 
-function my_admin_scripts() {
    wp_register_script('sign-up-extend', plugins_url('js/alter-sign-up.js', __FILE__));
    wp_enqueue_script('sign-up-extend');
 
-//	wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
-//	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
-
-//  wp_enqueue_script( 'hide-field-js' );
-//	wp_enqueue_style( 'hide-questions' );
-
 }
+*/
+function add_new_blog_field( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
 
-function add_new_blog_field( $blog_id, $user_id, $domain, $path, $site_id, $meta )
-{
-	
     $new_field_value = 'default';
     // Site added in the back end
-    if( !empty( $_POST['blog']['site_category'] ) )
-    {
+    if( !empty( $_POST['blog']['site_category'] ) ) {
         switch_to_blog( $blog_id );
         $new_field_value = $_POST['blog']['site_category'];
         update_option( 'site_category', $new_field_value );
 
         restore_current_blog();
-    }
-    // Site added in the front end
-    elseif( !empty( $meta['site_category'] ) )
-    {
+    } else if( !empty( $meta['site_category'] ) ) {
         $new_field_value = $meta['site_category'];
         update_option( 'site_category', $new_field_value );
     }
@@ -212,33 +206,36 @@ For the Network Admin Menu
 
 add_action('network_admin_menu', 'nbm_network_admin_menu');			// Adds the Network Admin Menu
 
-function nbm_network_admin_menu() {									// Hook to add in the Network Admin Menu
+function nbm_network_admin_menu() {									
+	// Hook to add in the Network Admin Menu
 	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', '../wp-content/plugins/network-blog-metadata/images/data.png' );
 
 }
 
-function nbm_network_manage_menu() {
+function nbm_network_manage_menu() {								
+	// The content for the network admin menu page
 	global $wpdb;
 	$tablename = $wpdb->prefix . "wpnbm_data";
-	
-	wp_register_script( 'highcharts', plugins_url( '/js/highcharts/js/highcharts.js', __FILE__ ) );
-	wp_enqueue_script( 'highcharts' );
-	wp_register_script( 'charts', plugins_url( '/js/charts.js', __FILE__ ) );
-	wp_enqueue_script( 'charts' );
+
+	$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
+	if (empty($table_exists)) { // Just make sure that the table doesn't exist already.
+		nbm_create_table();		// If not, create the table
+	}
 		
-	if (!(empty($_POST))) :
-		if ( isset( $_POST['do_null'] ) ) :
+	if (!(empty($_POST))) {		// If the function to populate the null values has been called
+		if ( isset( $_POST['do_null'] ) ) {
 			nbm_populate_null();
-		endif;
-	endif;
+		}
+	}
 
-	$all_blogs = count($wpdb->get_results('SELECT `blog_id` from wp_blogs' , ARRAY_A));
+	$all_blogs = count($wpdb->get_results('SELECT `blog_id` from wp_blogs' , ARRAY_A));	// Counts the number of blogs in the database
 
-	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);
+	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);				// Selects all the roles in the wpnbm_data table
 
-	$uses = array( 'course_website' => 0 , 'personal'  => 0 , 'porfolio'  => 0 , 'research'  => 0 , 'other' => 0 );
+	$uses = array( 'course_website' => 0 , 'personal'  => 0 , 'porfolio'  => 0 , 'research'  => 0 , 'other' => 0 ); // An array for the uses to check for the "other field"
 
-	foreach ( $data as $datum ) :
+	// foreach statements that pulls the data from the SQL query into a usable array
+	foreach ( $data as $datum ) {
 		if ( ! ( isset( $null ) ) ) $null = 0;
 		if ( ! ( isset( $student ) ) ) $student = 0;
 		if ( ! ( isset( $professor ) ) ) $professor = 0;
@@ -258,102 +255,12 @@ function nbm_network_manage_menu() {
 		if ($datum['blog_intended_use'] == 'research' ) $uses['research']++;
 		if (!(in_array($datum['blog_intended_use'], $uses))) $uses['other']++;
 
-	endforeach;
+	}
 	
 	
 	$total = count($data);
-	
-
 
 ?>	
-		<script type="text/javascript">
-			(function($) {
-				$(document).ready(function () {
-			        $('#users').highcharts({
-			            chart: {
-			                plotBackgroundColor: null,
-			                plotBorderWidth: null,
-			                plotShadow: false
-			            },
-			            title: {
-			                text: 'Types of Users'
-			            },
-			            tooltip: {
-			        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
-			            	percentageDecimals: 1
-			            },
-			            plotOptions: {
-			                pie: {
-			                    allowPointSelect: true,
-			                    cursor: 'pointer',
-			                    dataLabels: {
-			                        enabled: true,
-			                        color: '#000000',
-			                        connectorColor: '#000000',
-			                        formatter: function() {
-			                            return '<b>'+ this.point.name +'</b>: '+ this.percentage +' %';
-			                        }
-			                    }
-			                }
-			            },
-			            series: [{
-			                type: 'pie',
-			                name: 'User Spread',
-			                data: [
-			                    ['Not Defined',   		<?php echo round((($null/$total)*100),1); ?>],
-			                    ['Professors',  <?php echo round((($professor/$total)*100),1); ?>],
-			                    ['Students',    <?php echo round((($student/$total)*100),1); ?>],
-			                    ['Staff',     	<?php echo round((($staff/$total)*100),1); ?>],
-			                ]
-			            }]
-			        });
-			    })
-			})(jQuery);
-		</script>
-			<script type="text/javascript">
-				(function($) {
-					$(document).ready(function () {
-				        $('#uses').highcharts({
-				            chart: {
-				                plotBackgroundColor: null,
-				                plotBorderWidth: null,
-				                plotShadow: false
-				            },
-				            title: {
-				                text: 'Blog Uses'
-				            },
-				            tooltip: {
-				        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
-				            	percentageDecimals: 1
-				            },
-				            plotOptions: {
-				                pie: {
-				                    allowPointSelect: true,
-				                    cursor: 'pointer',
-				                    dataLabels: {
-				                        enabled: true,
-				                        color: '#000000',
-				                        connectorColor: '#000000',
-				                        formatter: function() {
-				                            return '<b>'+ this.point.name +'</b>: '+ this.percentage +' %';
-				                        }
-				                    }
-				                }
-				            },
-				            series: [{
-				                type: 'pie',
-				                name: 'Uses',
-				                data: [
-									<?php
-									foreach ($uses as $key => $val) :
-										echo '["'.$key.'",  ' . $val . '],';
-									endforeach; ?>
-				                ]
-				            }]
-				        });
-				    })
-				})(jQuery);
-			</script>
 
 <p><h2>This is a network admin menu page. Reports and other things will be added here soon.</h2></p>
 <p>There are <?php echo $total; ?> blogs in the wp_wpnbm_data table out of <?php echo $all_blogs; ?> all blogs in the system. (<?php echo round((($total/$all_blogs)*100),2); ?>%)
@@ -373,10 +280,7 @@ function nbm_network_manage_menu() {
 <br />
 <br />
 <p><b>What other reports should go here? I can do a bunch. We could also turn these things into pie charts and fancy stuff.</b></p>
-<div>
-<div id="users" style="min-width: 400px; height: 200px; margin: 0 50px; float: left;"></div>
-<div id="uses" style="min-width: 400px; height: 200px; margin: 0 50px; float: left;"></div>
-</div>
+
 <?php	
 }
 
@@ -396,24 +300,26 @@ function nbm_populate_null() {
 	array_walk($ids,'flatten_array');
 	$ids = array_flip($ids);
 
-	foreach ($data as $datum) :
-		if ( in_array( $datum['blog_id'] , array_keys($ids) )) :
+	foreach ($data as $datum) {
+		if ( in_array( $datum['blog_id'] , array_keys($ids) )) {
 			unset($ids[$datum['blog_id']]);
-		endif;
-	endforeach;
+		}
+	}
 	$ids = array_flip($ids);
 	$count = 0;
-	foreach ( $ids as $id ) :
-		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
+	foreach ( $ids as $id ) {
+		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL )';
 		$result = $wpdb->get_results($sql);
 		$count++;
-	endforeach;
+	}
 	
-	echo '<div class="updated fade">' . $count . ' blogs with null values added into the database.</div>';
+	echo '<div class="updated fade">' . $count . ' blogs with null values added into the database.</div>';	// Message to appear declaring completion of null population
 		
 }
 
-function flatten_array(&$item) { 				// Quick helper function to deal with arrays from the reports
+function flatten_array(&$item) { 				
+// Quick helper function to deal with arrays from the reports
+// Basically, it matches up the numeric array keys to the blog ids
 
 	$item = $item[0];
 	
@@ -421,118 +327,98 @@ function flatten_array(&$item) { 				// Quick helper function to deal with array
 
 
 
-
-
-
 /***********
 For the per-site Admin Menu
 ***********/
 
-function nbm_admin_init() {				// Registers the javascript and css for the per-site Admin Menu
+function nbm_admin_init() {				
+	// Registers the javascript and css for the per-site Admin Menu
     wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
     wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) );
 
 }
 
-function nbm_admin_scripts() {			// Enqueues the javascript and css for the per-site Admin Menu
+function nbm_admin_scripts() {			
+	// Enqueues the javascript and css for the per-site Admin Menu
     wp_enqueue_script( 'hide-field-js' );
 	wp_enqueue_style( 'hide-questions' );
 }
 
-function nbm_admin_menu() {				// Hooks into the dashboard to create the per-site Admin Menu
-    /* Add our plugin submenu and administration screen */
+function nbm_admin_menu() {				
+	// Hooks into the dashboard to create the per-site Admin Menu
     $page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data.png' );
 
     add_action('admin_print_scripts-' . $page_hook_suffix, 'nbm_admin_scripts');
 }
 
-function nbm_manage_menu() {			// Function that processes the form variables for the per-site Admin Menu
-										// it also calls on the function to write the content of the per-site Admin Men
+function nbm_manage_menu() {			
+	// Function that processes the form variables for the per-site Admin Menu
+	// it also calls on the function to write the content of the per-site Admin Men
 	   	global $wpdb;
 	   	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
 	
 		// These next calls should be coming from the network admin on an install script or activation script or something like that...
 		// The creation of the table shouldn't exist in the regular user admin menus
 		$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
-		if (empty($table_exists)) :
+		if (empty($table_exists)) {	
+			// Again, just checks to make sure that the table exists... I could add a "die" function here and return a message saying that the network admin needs to fix the installation. What should we do here? Right now it just creates the table if it doesn't exist.
 			nbm_create_table();
-		endif;
+		}
 		
 		global $blog_id;
 
 		$row_exists = $wpdb->get_var('SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id);
 
-    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) : // For processing the form if submitted
+    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) { 
+	// For processing the form if submitted
 
 		// Start processing the data in order to put into a SQL Query	
-		foreach ($_POST as $key => $val) :
-			if (!($val == NULL)) :
+		foreach ($_POST as $key => $val) {
+			if (!($val == NULL)) {
 				$_POST[$key] = '"' . $val . '"';
-			else : 
+			} else { 
 				$_POST[$key] = "NULL";
-			endif;
-		endforeach;
+			}
+		}
 		
-		if ($_POST['course_website'] == '"Yes"') :
+		if ($_POST['course_website'] == '"Yes"') {
 			$purpose = '"course_website"';
-		elseif ($_POST['purpose'] == '"other"') :
+		} else if ($_POST['purpose'] == '"other"') {
 			$purpose = $_POST['use_other'];
-		else :
+		} else {
 			$purpose = $_POST['purpose'];
-		endif;
+		}
 		
 		// Finished replacing values within the $_POST array in order to insert the correct ones.
-		if (!(empty($row_exists))) :
+		if (!(empty($row_exists))) {
 			$sql = 'UPDATE ' . $tablename . ' 
 					SET 
 					`user_role` = ' . $_POST["role"] . ',
 					`blog_intended_use` = ' . $purpose . ',
 					`course_title` = ' . $_POST["course_name"] . ',
 					`course_number` = ' . $_POST["course_number"] . ',
-					`course_enrollment` = NULL,
-					`course_multiple_section` = NULL,
-					`course_writing_intensive` = NULL,
-					`course_interactive` = NULL,
-					`visibility` = NULL,
-					`research_area` = NULL,
-					`portfolio_professional` = NULL,
-					`portfolio_content_type` = NULL,
-					`student_level` = NULL,
 					`student_major` = ' . $_POST["major"] . ',
-					`person_department` = ' . $_POST["department"] . ',
-					`class_project_course` = NULL,
-					`class_project_description` = NULL  WHERE `blog_id` = ' . $blog_id;
-		else :
+					`person_department` = ' . $_POST["department"] . '  WHERE `blog_id` = ' . $blog_id;
+		} else {
 			$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
 				$blog_id . ', ' .
 				$_POST["role"] . ', ' .
 				$purpose . ', ' .
 				$_POST["course_name"] . ', ' .
 				$_POST["course_number"] . ', ' . '
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
-				NULL,
 				`student_major` = ' . $_POST["major"] . ', 
-				`person_department` = ' . $_POST["department"] . ', 
-				NULL,
-				NULL)';
-		endif;
+				`person_department` = ' . $_POST["department"] . ')';
+		}
 
 
 		$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
 		echo '<div class="updated fade">Thank you for submitting the metadata.</div>';
 		$buffer = print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
 	 	echo $buffer;
-    else :
+    } else {
 		$buffer = print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
 		echo $buffer;
-	endif;
+	}
 }
 
 
@@ -545,8 +431,9 @@ function nbm_manage_menu() {			// Function that processes the form variables for
 */
 
 
-function print_nbm_data() {					// Function that prints the per-site Admin Menu
-	
+function print_nbm_data() {					
+	// Function that prints the per-site Admin Menu
+		
 	//	I need to reimplement this for security reasons
 	//
 	//	if ( !current_user_can( 'manage_options' ) )  {
@@ -555,25 +442,14 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 	
    	global $wpdb, $blog_id;
    	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
-	
-	
-	    	/* Display our administration screen */
 
-			/*  Currently, the classes are the name of the field the question is dependent on.
-				We should find a more intelligent way to do this...
-
-				Class structures:
-					1)	hide_question -- hides initially
-					2)	dependent-on	
-					3)	role (to erase)
-			*/
 
 			$sql = 	'SELECT * from ' . $tablename .
 					' WHERE `blog_id` = ' . $blog_id;
 					
 			$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
 
-	ob_start();
+	ob_start(); // Put this into an output buffer so that we can return the entire text to whichever function needs it.
 	?>
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 		<div class="wpnbm">
@@ -726,15 +602,22 @@ function print_nbm_data() {					// Function that prints the per-site Admin Menu
 	</form>
 	
 	<?php
-	$buffer = ob_get_contents();
-  	ob_end_clean();
+	$buffer = ob_get_contents(); 	// Put the output buffer into a variable
+  	ob_end_clean();					// Stop capturing output and remove the output buffer to reduce memory usage
 
-	return $buffer;
+	return $buffer;					// Returns the text form
 
 }
 
 
-function nbm_create_table() {				// Function to create the data table
+/***
+
+Installation and uninstallation functions
+
+***/
+
+function nbm_create_table() {				
+	// Function to create the data table
 	
    global $wpdb;
    $tablename = $wpdb->base_prefix . "wpnbm_data"; // General tablename
@@ -746,19 +629,8 @@ function nbm_create_table() {				// Function to create the data table
 			  `blog_intended_use` VARCHAR(45) NULL ,
 			  `course_title` VARCHAR(128) NULL ,
 			  `course_number` VARCHAR(45) NULL ,
-			  `course_enrollment` INT NULL ,
-			  `course_multiple_section` BINARY NULL ,
-			  `course_writing_intensive` BINARY NULL ,
-			  `course_interactive` VARCHAR(45) NULL ,
-			  `visibility` VARCHAR(45) NULL ,
-			  `research_area` VARCHAR(128) NULL ,
-			  `portfolio_professional` BINARY NULL ,
-			  `portfolio_content_type` VARCHAR(128) NULL ,
-			  `student_level` VARCHAR(20) NULL ,
 			  `student_major` VARCHAR(128) NULL ,
 			  `person_department` VARCHAR(128) NULL ,
-			  `class_project_course` VARCHAR(128) NULL ,
-			  `class_project_description` MEDIUMTEXT NULL ,
 			  PRIMARY KEY (`blog_id`) ,
 			  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
 			);";
@@ -769,19 +641,32 @@ function nbm_create_table() {				// Function to create the data table
 }
 
 
-function on_activation()
-{
-   if( !is_multisite() )
-       wp_die( 'This plugin is available only for multisite installations.' );
+function installNBM() { 
+	// This function currently isn't called when it's supposed to be called
+   if( !is_multisite() ) wp_die( 'This plugin is available only for multisite installations.' ); // This plugin shouldn't be installed on single sites, so kill the activation if single site..
 
 	global $wpdb;
 	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
 
 	$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
-	if (empty($table_exists)) : // Just make sure that the table doesn't exist already.
-	nbm_create_table();
-	endif;
+	if (empty($table_exists)) { 
+		// Just make sure that the table doesn't exist already.
+		nbm_create_table();
+	}
 
-// The populate null values script could go here...
+// The populate null values script could go here... | should it?
 
+}
+
+function uninstallNBM() { 
+	// Write function to delete the table if the user wants to do so on deactivation.
+	
+	// <script type="text/javascript">
+	// 		alert('Do you want to delete the NBM tables?');
+	// 		capture the output of the alert (or we might need to replace this with a different dialog.
+	//		Delete the tables if yes. Don't if no.
+	// </script>
+	// Return a message
+	// Data for NBM removed from the database.
+	
 }
