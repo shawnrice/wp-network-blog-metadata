@@ -4,7 +4,7 @@
 Plugin Name: Network Blog Metadata
 Plugin URI: https://github.com/shawnrice/wp-network-blog-metadata
 Description: A plugin to collect usage data about individual blogs on a network installation.
-Version: 0.1-alpha
+Version: 0.2-alpha
 Author: Shawn Rice
 Author URI: 
 License: GPL2
@@ -67,7 +67,26 @@ define ( 'BP_REGISTER_SLUG', 'signup' );
 define ( 'BP_ENABLE_MULTIBLOG', true );
 
 
+
+
+
+
+
 */
+
+
+function nbm_bp_init() {
+	require( dirname( __FILE__ ) . '/bp/bp-functions.php' );
+}
+$is_bp_active = ( has_action( 'wp_head' , 'bp_core_add_ajax_url_js' ) );
+if ($is_bp_active) nbm_bp_init();
+else nbm_wpmu_init();
+
+function nbm_wpmu_init() {
+	require( dirname( __FILE__ ) . '/wpmu-functions.php' );
+}
+
+
 register_activation_hook( __FILE__ , 'installNBM' ); // Call to run the installation script when plugin is activated.
 
 add_action( 'admin_init', 'nbm_admin_init' );
@@ -78,17 +97,23 @@ add_action( "admin_print_scripts-site-new.php", "add_extra_field_on_blog_signup"
 
 // Add form to user registration and new blog creation for regular users
 add_action('register','add_nbm_registration_fields');
-
-
 function add_nbm_registration_fields() {
 	wp_register_script( 'sign-up-extend' , plugins_url('js/alter-sign-up.js', __FILE__));
 	wp_enqueue_script( 'sign-up-extend' );
 	wp_register_style( 'hide-questions', plugins_url( '/nbm-style.css', __FILE__ ) ); // Stylesheet that just includes the way to hide the questions when not in use
 	wp_enqueue_style( 'hide-questions' );
 	
-	
+
     //Get and set any values already sent
-    $user_extra = ( isset( $_POST['user_extra'] ) ) ? $_POST['user_extra'] : '';
+	// Doesn't work yet
+$course_website = ( isset( $_POST['course_website'] ) ) ? $_POST['course_website'] : '';
+$use_other = ( isset( $_POST['use_other'] ) ) ? $_POST['use_other'] : '';
+$purpose = ( isset( $_POST['purpose'] ) ) ? $_POST['purpose'] : '';
+$course_name = ( isset( $_POST['course_name'] ) ) ? $_POST['course_name'] : '';
+$course_number = ( isset( $_POST['course_number'] ) ) ? $_POST['course_number'] : '';
+$major = ( isset( $_POST['major'] ) ) ? $_POST['major'] : '';
+$department = ( isset( $_POST['department'] ) ) ? $_POST['department'] : '';
+
 }
 
 // Works called during the admin menus
@@ -169,19 +194,19 @@ For extending the site-new.php page | this is an admin-menu page
 ***********/
 
 // Only add the script for the page site-new.php (the page hook).
-add_action( 'admin_print_scripts-site-new.php', 'nbm_admin_scripts' );
-add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Validates the data | does it?
+add_action( 'admin_print_scripts-site-new.php', 'nbm_admin_scripts_alter' );
+//add_action( 'wpmu_new_blog', 'add_new_blog_field' , 10, 6); 		// Validates the data | does it?
 
 
-/*
-function nbm_admin_scripts() {
+
+function nbm_admin_scripts_alter() {
 // Enqueues the js for the admin menu script
 
-   wp_register_script('sign-up-extend', plugins_url('js/alter-sign-up.js', __FILE__));
+   wp_register_script('sign-up-extend', plugins_url('js/alter-sign-up-admin.js', __FILE__));
    wp_enqueue_script('sign-up-extend');
 
 }
-*/
+
 function add_new_blog_field( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
 
     $new_field_value = 'default';
@@ -383,8 +408,9 @@ function nbm_manage_menu() {
 		
 		if ($_POST['course_website'] == '"Yes"') {
 			$purpose = '"course_website"';
-		} else if ($_POST['purpose'] == '"other"') {
-			$purpose = $_POST['use_other'];
+		} else if ($_POST['purpose'] == 'other') {
+			if (is_null($_POST['use_other'])) $purpose = '"other"';
+			else $purpose = $_POST['use_other'];
 		} else {
 			$purpose = $_POST['purpose'];
 		}
@@ -440,7 +466,7 @@ function print_nbm_data() {
 	//		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	//	}
 	
-   	global $wpdb, $blog_id;
+   	global $wpdb, $blog_id, $return_bp;
    	$tablename = $wpdb->base_prefix . "wpnbm_data"; // This is a site-wide table
 
 
@@ -450,7 +476,10 @@ function print_nbm_data() {
 			$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
 
 	ob_start(); // Put this into an output buffer so that we can return the entire text to whichever function needs it.
+	
 	?>
+
+	
 	<form method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 		<div class="wpnbm">
 			<p>Please take a moment to tell us a little bit about your <b>Blogs @ Baruch site</b>. This information will be available only to the <b>B@B</b> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users.</p>
@@ -560,7 +589,7 @@ function print_nbm_data() {
 				<div class="<?php if (!($data['user_role'] == 'Professor')) echo 'hide_question '; ?>professor question">
 					Is this a course website? <br />
 					<select name="course_website" class="professor">
-						<option value="">---</option>
+						<option value=""<?php if (is_null($data['blog_intended_use'])) echo ' selected';?>>---</option>
 						<option<?php if ($data['blog_intended_use'] == 'course_website') echo ' selected';?>>Yes</option>
 						<option<?php if (($data['user_role'] == 'Professor') && (!(is_null($data['blog_intended_use']))) && ($data['blog_intended_use'] != 'course_website')) echo ' selected';?>>No</option>
 					</select>
@@ -586,11 +615,15 @@ function print_nbm_data() {
 <?php
 						$blog_intended_use = $data['blog_intended_use'];
 						$uses = array('course_website' , 'personal' , 'porfolio' , 'research' , 'other');?>
-						<option value="other"<?php if (!(in_array($blog_intended_use, $uses))) echo ' selected';?>>Other</option>
+						<option value="other"<?php 
+						if (((!(is_null($blog_intended_use))) && (!(in_array($blog_intended_use, $uses)))) || ($blog_intended_use == 'other')) echo ' selected';
+						?>>Other</option>
 					</select>
 					<br />
-					<div class="<?php if ((in_array($blog_intended_use, $uses))) echo 'hide_question '; ?>use_other">
-						Please specify: <input name="use_other" class="purpose"<?php if (!(in_array($blog_intended_use, $uses))) echo ' value="' . $blog_intended_use . '"';?>>
+					<div class="<?php if (((is_null($blog_intended_use))) || (!(in_array($blog_intended_use, $uses)))) echo 'hide_question '; ?>use_other">
+						Please specify: <input name="use_other" class="purpose"<?php 
+							if ((!(is_null($blog_intended_use))) && (!(in_array($blog_intended_use, $uses)))) echo ' value="' . $blog_intended_use . '"';
+						?>>
 					</div>
 				</div>
 			</div> <? // End the second column that shows the use-data -- right column ?>
