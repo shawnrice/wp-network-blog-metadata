@@ -87,7 +87,18 @@ function nbm_network_manage_menu() {
 <br />
 <p><b>What other reports should go here? I can do a bunch. We could also turn these things into pie charts and fancy stuff.</b></p>
 
-<?php	
+CSV:<br />
+<pre>
+blog_id,user_role,blog_intended_use,course_title,course_number,student_major,person_department
+<?php
+foreach ($data as $datum) {
+	foreach ( $datum as $val ) {
+		echo $val.',';
+	}
+	echo '<br/>';
 }
-
+?>
+</pre>
+<?php
+}
 ?>
