@@ -88,7 +88,8 @@ function nbm_network_manage_menu() {
 <p><b>What other reports should go here? I can do a bunch. We could also turn these things into pie charts and fancy stuff.</b></p>
 
 CSV:<br />
-<pre>
+-------------
+<pre style="border: 1px dotted gray; padding: 20px; max-width: 800px;">
 blog_id,user_role,blog_intended_use,course_title,course_number,student_major,person_department
 <?php
 foreach ($data as $datum) {
@@ -99,6 +100,9 @@ foreach ($data as $datum) {
 }
 ?>
 </pre>
+-------------
+<br />
+End Preliminary CSV Data
 <?php
 }
 ?>
