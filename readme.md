@@ -5,15 +5,11 @@ We need a new name.
 This plugin will collect and store metadata about blogs on a network install of Wordpress
 
 ### Todo
-
-* Validate user signup fields* Return errors on fields
 * Re-populate after errors
-
 * Get actual data (list of departments, majors, etc...)
 * Install and uninstall hooks
 * Separate Staff and Faculty "department"
 * Test for cross-browser compatibility
-
 * Convert admin menu form submission to an ajax callback function (_is this necessary?_)
 * Finish writing roadmap
 
@@ -35,6 +31,8 @@ This plugin will collect and store metadata about blogs on a network install of 
 * ~~Hook into WP Blog registration form~~
 * ~~Standardize classes and values (use of hyphens and underscores, match to table column names)~~
 * ~~Test to make sure there are no conflicts with BuddyPress~~
+* ~~Create Network Admin Tableview~~
+* ~~Validate user signup fields* Return errors on fields~~ (not necessary for B@B)
 
 #### Table design and implementation
 The current table is designed to include many questions that are in the draft document. Most of the columns are not used.
