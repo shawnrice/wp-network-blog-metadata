@@ -198,6 +198,16 @@ function process_extra_field_on_blog_signup($blog_id, $user_id, $domain, $path, 
 }
 
 
+add_filter('add_signup_meta', 'append_extra_field_as_meta');
+function append_extra_field_as_meta($meta) {
+
+    if(isset($_REQUEST['role'])) {
+        $meta['role'] = $_REQUEST['role'];
+    }
+    return $meta;
+
+}
+
 /*********** 
 For extending the site-new.php page | this is an admin-menu page
 ***********/
