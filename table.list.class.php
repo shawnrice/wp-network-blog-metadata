@@ -58,6 +58,8 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 				else if (  $item[$column_name] == 'x' ) return 'x';
 				else if ( ! empty( $item[$column_name] ) && (! in_array( $item[$column_name] , $uses ) ) ) return 'Other (' . $item[$column_name] . ')';
 				else return $item[$column_name];
+			case 'path' :
+				return '<a href=http://' . $item['domain'] . '>' . $item[$column_name] . '</a>';
             default:
                 return print_r($item,true); // Show the whole array for troubleshooting purposes
         }
@@ -107,7 +109,8 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
         $columns = array(
             'blog_id'   	  	=> 'Blog ID',
             'role'		    	=> 'Role',
-            'purpose' 			=> 'Purpose'
+            'purpose' 			=> 'Purpose',
+			'path'				=> 'Site URL'
         );
         return $columns;
     }
@@ -127,10 +130,11 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
      * @return array An associative array containing all the columns that should be sortable: 'slugs'=>array('data_values',bool)
      **************************************************************************/
     function get_sortable_columns() {
-        $sortable_columns = array(
-            'blog_id'     => array('blog_id',false),     //true means it's already sorted
-            'role'    => array('role',false),
-            'purpose'  => array('purpose',false)
+        $sortable_columns 	= array(
+            'blog_id'     	=> array( 'blog_id' , false ),     //true means it's already sorted
+            'role'    		=> array( 'role' , false ),
+            'purpose'  		=> array( 'purpose' , false ),
+			'path' 			=> array( 'path' , false )
         );
         return $sortable_columns;
     }  
@@ -179,10 +183,21 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 
 		// Construct query to get data
 		$tablename = $wpdb->prefix . "nbm_data";
-		$querydata = $wpdb->get_results("
-			SELECT `blog_id` , `role` , `purpose` FROM $tablename"
+		$sql = '
+			SELECT ' . $tablename . '.blog_id , ' . $tablename . '.role , ' . $tablename . '.purpose , wp_blogs.path , wp_blogs.domain FROM ' . $tablename . '
+						INNER JOIN wp_blogs
+						ON ' . $tablename . '.blog_id=wp_blogs.blog_id
+		';
+		
+
+		
+		$querydata = $wpdb->get_results($sql);
+        
+		$blog_data = (array)$wpdb->get_results("
+			SELECT `blog_id` , `domain` , `path` FROM wp_blogs"
 		);
-                
+		
+
         $data = array();
 
 		foreach ($querydata as $querydatum ) {
@@ -190,7 +205,14 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 				if ($val == '') {
 					$querydatum->$key = 'x'; // Change out the null values for 'x'
 				}
+				if ( $key == 'domain' ) $querydatum->$key = $val . $querydatum->path;
 			}
+			$querydatum = (array)$querydatum;
+
+			echo '<pre>';
+			print_r($querydatum);
+			echo '</pre>';
+			
 		   array_push($data, (array)$querydatum);
 		}
 		
