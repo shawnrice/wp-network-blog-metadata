@@ -59,7 +59,7 @@
 		});
 
 		$('select[name="purpose"]').change(function() {
-			if ($(this).val() === "other") {
+			if ($(this).val() === "Other") {
 				$('.use_other , .use-other').fadeIn(200);		
 			}
 			else {

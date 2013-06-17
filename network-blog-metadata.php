@@ -1,14 +1,15 @@
 <?php
 
 /*
-Plugin Name: Test Plugin
+Plugin Name: Network Blog Metadata for B@B
 Plugin URI: https://github.com/shawnrice/wp-network-blog-metadata
-Description: A plugin to collect usage data about individual blogs on a network installation.
-Version: 0.2-alpha
+Description: A plugin to collect usage data about individual blogs on a network installation, specifically designed for B@B.
+Version: 0.7-alpha
 Author: Shawn Rice
 Author URI: 
 License: GPL2
 */
+
 
 
 // Hook the nbm_append_signup into the signup_blogform action
@@ -89,7 +90,7 @@ function nbm_append_signup() {
 		</div>
 		<div id="major" class="<?php if (!( $nbm_err['role'] == 'Student' ) ) echo 'hide_question ';?> student question">
 			<label for="major"><?php _e( 'Major:' ) ?></label>				
-			<select name="major" class="hide_question student">
+			<select name="major" class="student">
 				<option value="">---</option>
 				<option<?php if ( $nbm_err['major'] == "Undeclared") echo " selected";?>>Undeclared</option>
 				<option<?php if ( $nbm_err['major'] == "Accountancy") echo " selected";?>>Accountancy</option>
@@ -150,8 +151,8 @@ function nbm_append_signup() {
 			<label for="purpose"><?php _e( 'What will the primary purpose of this blog be?' ) ?></label>				
 			<select name="purpose">
 				<option value="">---</option>
-				<option <?php if ( $nbm_err['purpose'] == 'Personal Blog Blog' ) echo ' selected';?>>Personal Blog Blog</option>
-				<option <?php if ( $nbm_err['purpose'] == 'Research Blog Blog' ) echo ' selected';?>>Research Blog Blog</option>
+				<option <?php if ( $nbm_err['purpose'] == 'Personal Blog' ) echo ' selected';?>>Personal Blog</option>
+				<option <?php if ( $nbm_err['purpose'] == 'Research Blog' ) echo ' selected';?>>Research Blog</option>
 				<option <?php if ( $nbm_err['purpose'] == 'Portfolio' ) echo ' selected';?>>Portfolio</option>
 <?php			$purpose = $nbm_err['purpose'];?>
 				<option <?php if ( $nbm_err['purpose'] == 'Other' ) echo ' selected';?>>Other</option>
@@ -168,7 +169,66 @@ function nbm_append_signup() {
 		<?php
 }
 
+// When the new site is finally created (user has followed the activation link provided via e-mail), add a row to the options table with the value he submitted during signup
+add_action('wpmu_new_blog', 'process_nbm_on_blog_signup', 10, 6);					// Dependent on a WPMU installation
+function process_nbm_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id, $meta) {
 
+		   	global $wpdb;
+		   	$tablename = $wpdb->base_prefix . "nbm_data"; // This is a site-wide table
+
+			// These next calls should be coming from the network admin on an install script or activation script or something like that...
+			// The creation of the table shouldn't exist in the regular user admin menus
+			$table_exists = $wpdb->get_results( "SHOW TABLES LIKE '" . $tablename . "'" );
+			if ( empty( $table_exists ) ) {
+				nbm_create_table();
+			}
+
+			$row_exists = $wpdb->get_var( 'SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id );
+
+	    if ( $_SERVER["REQUEST_METHOD"] == "POST" ) { 
+			// For processing the form if submitted
+			// Start processing the data in order to put into a SQL Query	
+			foreach ($_POST as $key => $val) {
+				if (!($val == NULL)) {
+					$_POST[$key] = '"' . $val . '"';
+				} else {
+					$_POST[$key] = "NULL";
+				}
+			}
+
+			if ($_POST['course_website'] == '"Yes"') {
+				$purpose = '"course_website"';
+			} else if ($_POST['purpose'] == '"Other"') {
+				$purpose = $_POST['use_other'];
+			} else {
+				$purpose = $_POST['purpose'];
+			}
+
+			// Finished replacing values within the $_POST array in order to insert the correct ones.
+			// The update sql should never be called
+			if ( ! ( empty( $row_exists ) ) ) {
+				$sql = 'UPDATE ' . $tablename . ' 
+						SET 
+						`user_role` = ' . $_POST["role"] . ',
+						`blog_intended_use` = ' . $purpose . ',
+						`course_name` = ' . $_POST["course_name"] . ',
+						`course_number` = ' . $_POST["course_number"] . ',
+						`major` = ' . $_POST["major"] . ',
+						`department` = ' . $_POST["department"] . '
+						WHERE `blog_id` = ' . $blog_id;
+			} else {
+				$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
+						$blog_id . ', ' .
+						$_POST["role"] . ', ' .
+						$purpose . ', ' .
+						$_POST["course_name"] . ', ' .
+						$_POST["course_number"] . ', ' . '
+						`major` = ' . $_POST["major"] . ', 
+						`department` = ' . $_POST["department"] . ')';
+			}
+			$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
+		}
+}
 
 /***********
 For the per-site Admin Menu
@@ -193,7 +253,7 @@ function nbm_admin_scripts() {
 
 function nbm_admin_menu() {				
 	// Hooks into the dashboard to create the per-site Admin Menu
-    $page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data.png' );
+    $page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data_16.png' );
 
     add_action('admin_print_scripts-' . $page_hook_suffix, 'nbm_admin_scripts');
 }
@@ -217,7 +277,7 @@ function nbm_manage_menu() {
 
     if ( $_SERVER["REQUEST_METHOD"] == "POST" ) { 
 	// For processing the form if submitted
-
+	
 		// Start processing the data in order to put into a SQL Query	
 		foreach ($_POST as $key => $val) {
 			if (!($val == NULL)) {
@@ -229,7 +289,7 @@ function nbm_manage_menu() {
 		
 		if ($_POST['course_website'] == '"Yes"') {
 			$purpose = '"course_website"';
-		} else if ($_POST['purpose'] == 'Other') {
+		} else if ($_POST['purpose'] == '"Other"') {
 			if (is_null($_POST['use_other'])) $purpose = '"Other"';
 			else $purpose = $_POST['use_other'];
 		} else {
@@ -259,7 +319,7 @@ function nbm_manage_menu() {
 
 
 		$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
-		echo '<div class="updated fade">Thank you for submitting the metadata.</div>';
+		echo '<div class="updated fade" style="margin: 13px;">Thank you for submitting the metadata.</div>';
 		$buffer = print_nbm_data(); 					// Actually prints the content of the per-site Admin Menu
 	 	echo $buffer;
     } else {
@@ -306,7 +366,11 @@ function print_nbm_data() {
 		ob_start();	// Put this into an output buffer so that we can return the entire text to whichever function needs it.
 
 ?>
-	<h4>Metadata:</h4>
+
+   <div class="wrap">
+
+    <div style="background: no-repeat url('wp-content/plugins/network-blog-metadata/images/data_32.png');" class="icon32"><br/></div>
+    <h2>Blog Metadata</h2>
 	<form method="post" class="standard-form" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 	<div id="nbm">
 		<div id="nbm_intro">
@@ -363,7 +427,7 @@ function print_nbm_data() {
 		</div>
 		<div id="major" class="<?php if (!( $data['role'] == 'Student' ) ) echo 'hide_question ';?> student question">
 			<label for="major"><?php _e( 'Major:' ) ?></label>				
-			<select name="major" class="hide_question student">
+			<select name="major" class="student">
 				<option value="">---</option>
 				<option<?php if ( $data['major'] == "Undeclared") echo " selected";?>>Undeclared</option>
 				<option<?php if ( $data['major'] == "Accountancy") echo " selected";?>>Accountancy</option>
@@ -407,33 +471,34 @@ function print_nbm_data() {
 		<div id="course_website" class="<?php if (!( $data['role'] == 'Professor' ) ) echo 'hide_question '; ?>professor question">
 			<label for="course_website"><?php _e( 'Is this a course website?' ) ?></label>				
 			<select name="course_website" class="professor">
-				<option value=""<?php if (is_null( $data['course_website'] ) ) echo ' selected';?>>---</option>
-				<option<?php if ( $data['course_website'] == 'Yes' ) echo ' selected';?>>Yes</option>
-				<option<?php if ( ( $data['role'] == 'Professor' ) && ( $data['course_website'] == 'No' ) ) echo ' selected';?>>No</option>
+				<option value=""<?php if (is_null( $data['purpose'] ) ) echo ' selected';?>>---</option>
+				<option<?php if ( $data['purpose'] == 'course_website' ) echo ' selected';?>>Yes</option>
+				<option<?php if ( ( $data['role'] == 'Professor' ) && ( $data['purpose'] != 'course_website' ) ) echo ' selected';?>>No</option>
 			</select>
 		</div>
-		<div id="course_name" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['course_website'] == 'Yes' ) ) ) echo 'hide_question '; ?>course_website question">
+		<div id="course_name" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['purpose'] == 'course_website' ) ) ) echo 'hide_question '; ?>course_website question">
 			<label for="course_name"><?php _e( 'Course Name:' ) ?></label>
 			<input type="text" name="course_name" class="course_website professor" size="38"<?php if ( $data['course_name'] ) echo 'value="'.esc_html( $data['course_name'] ) .'"';?>>
 		</div>
-			<div id="course_number" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['course_website']== 'Yes' ) ) ) echo 'hide_question '; ?>course_website question">
+			<div id="course_number" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['purpose']== 'course_website' ) ) ) echo 'hide_question '; ?>course_website question">
 			<label for="course_number"><?php _e( 'Course number (and section, if you have it):' ) ?></label>				
 			<input type="text" name="course_number" class="course_website professor" size="16"<?php if ( $data['course_number'] ) echo 'value="'.esc_html( $data['course_number'] ) .'"';?>>
 		</div>
-		<div id="purpose" class="<?php if ( ( ( $data['role'] == 'Professor' ) && ( $data['course_website'] == 'Yes' ) ) || ( is_null($data['role'] ) ) )echo 'hide_question '; ?>purpose question">
+		<div id="purpose" class="<?php if ( ( ( $data['role'] == 'Professor' ) && ( $data['purpose'] == 'course_website' ) ) || ( is_null($data['role'] ) ) )echo 'hide_question '; ?>purpose question">
 			<label for="purpose"><?php _e( 'What will the primary purpose of this blog be?' ) ?></label>				
 			<select name="purpose">
 				<option value="">---</option>
-				<option <?php if ( $data['purpose'] == 'Personal Blog Blog' ) echo ' selected';?>>Personal Blog Blog</option>
-				<option <?php if ( $data['purpose'] == 'Research Blog Blog' ) echo ' selected';?>>Research Blog Blog</option>
+				<option <?php if ( $data['purpose'] == 'Personal Blog' ) echo ' selected';?>>Personal Blog</option>
+				<option <?php if ( $data['purpose'] == 'Research Blog' ) echo ' selected';?>>Research Blog</option>
 				<option <?php if ( $data['purpose'] == 'Portfolio' ) echo ' selected';?>>Portfolio</option>
 <?php			$purpose = $data['purpose'];?>
-				<option <?php if ( $data['purpose'] == 'Other' ) echo ' selected';?>>Other</option>
+<?php 			$uses = array( 'Personal Blog' , 'Research Blog' , 'Portfolio' , 'course_website' ); ?>
+				<option <?php if ( !in_array( $data['purpose'] , $uses ) ) echo ' selected';?>>Other</option>
 			</select>
 		</div>
-		<div id="use_other" class="<?php if ( $data['purpose'] != 'Other' ) echo 'hide_question '; ?>use_other">
+		<div id="use_other" class="<?php if ( in_array( $data['purpose'] , $uses ) ) echo 'hide_question '; ?>use_other">
 			<label for="use_other"><?php _e( 'Please specify:' ) ?></label>				
-			<input name="use_other" class="purpose"<?php if ( ! is_null( $data['use_other'] ) ) echo ' value="' . esc_html( $data['use_other'] ) . '"';?>>
+			<input name="use_other" class="purpose"<?php if ( !in_array( $data['purpose'] , $uses ) ) echo ' value="' . esc_html( $data['purpose'] ) . '"';?>>
 		</div>
 	</div>
 	<div>
@@ -443,6 +508,7 @@ function print_nbm_data() {
 		<input type="submit" />
 	</div>
 	</form>
+</div>
 	
 	<?php
 	$buffer = ob_get_contents(); 	// Put the output buffer into a variable
@@ -460,7 +526,7 @@ For the Network Admin Menu
 add_action('network_admin_menu', 'nbm_network_admin_menu');			// Adds the Network Admin Menu
 function nbm_network_admin_menu() {									
 	// Hook to add in the Network Admin Menu
-	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', '../wp-content/plugins/network-blog-metadata/images/data.png' );
+	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', '../wp-content/plugins/network-blog-metadata/images/data_16.png' );
 
 }
 
@@ -517,7 +583,7 @@ function nbm_network_manage_general_tab() {
 
 		$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);				// Selects all the roles in the wpnbm_data table
 
-		$uses = array( 'course_website' => 0 , 'Personal Blog'  => 0 , 'porfolio'  => 0 , 'Research Blog'  => 0 , 'Other' => 0 ); // An array for the uses to check for the "Other field"
+		$uses = array( 'course_website' => 0 , 'Personal Blog'  => 0 , 'Portfolio'  => 0 , 'Research Blog'  => 0 , 'Other' => 0 ); // An array for the uses to check for the "Other field"
 
 		// foreach statements that pulls the data from the SQL query into a usable array
 		foreach ( $data as $datum ) {
@@ -586,12 +652,10 @@ function nbm_network_admin_table_tab() {
    ?>
    <div class="wrap">
        
-       <div id="icon-users" class="icon32"><br/></div>
+       <div style="background: no-repeat url('wp-content/plugins/network-blog-metadata/images/data_32.png');" class="icon32"><br/></div>
        <h2>Blog Metadata</h2>      
        <form id="blog_metadata" method="get">
-           <!-- For plugins, we also need to ensure that the form posts back to our current page -->
            <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
-           <!-- Now we can render the completed list table -->
            <?php $metaTable->display() ?>
        </form>
        
@@ -619,7 +683,7 @@ function nbm_network_admin_export_tab() {
 CSV:<br />
 -------------
 <pre style="border: 1px dotted gray; padding: 20px; max-width: 800px;">
-blog_id,role,purpose,course_name,course_number,student_major,person_department
+blog_id,role,purpose,course_name,course_number,major,department
 <?php
 foreach ($data as $datum) {
 	foreach ( $datum as $val ) {
@@ -677,27 +741,6 @@ function flatten_array(&$item) {
 	$item = $item[0];
 	
 }
-
-
-
-
-
-
-
-/***
-
-Import functions:
-
-admin form
-network admin data menu
-
----
-
-rewrite admin form to be in a regular form table
-
-
-
-***/
 
 
 /***
