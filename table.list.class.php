@@ -49,8 +49,8 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
      **************************************************************************/
     function column_default($item, $column_name){
         switch($column_name){
-            case 'user_role':
-            case 'blog_intended_use':
+            case 'role':
+            case 'purpose':
 			case 'blog_id':
                 return $item[$column_name];
             default:
@@ -77,12 +77,6 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
      **************************************************************************/
     function column_title($item){
         
-        //Build row actions
-        $actions = array(
-            'edit'      => sprintf('<a href="?page=%s&action=%s&movie=%s">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
-            'delete'    => sprintf('<a href="?page=%s&action=%s&movie=%s">Delete</a>',$_REQUEST['page'],'delete',$item['ID']),
-        );
-        
         //Return the title contents
         return sprintf('%1$s <span style="color:silver">(id:%2$s)</span>%3$s',
             /*$1%s*/ $item['blog_id'],
@@ -106,9 +100,9 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
      **************************************************************************/
     function get_columns(){
         $columns = array(
-            'blog_id'     => 'Blog ID',
-            'user_role'    => 'User Role',
-            'blog_intended_use'  => 'Purpose'
+            'blog_id'   	  	=> 'Blog ID',
+            'role'		    	=> 'Role',
+            'purpose' 			=> 'Purpose'
         );
         return $columns;
     }
@@ -130,8 +124,8 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
     function get_sortable_columns() {
         $sortable_columns = array(
             'blog_id'     => array('blog_id',false),     //true means it's already sorted
-            'user_role'    => array('user_role',false),
-            'blog_intended_use'  => array('blog_intended_use',false)
+            'role'    => array('role',false),
+            'purpose'  => array('purpose',false)
         );
         return $sortable_columns;
     }  
@@ -155,7 +149,7 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
         global $wpdb;
 
 		// Variable to set number of records
-        $per_page = 10;
+        $per_page = 20;
         
         
         /**
@@ -179,9 +173,9 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
         $this->_column_headers = array($columns, $hidden, $sortable);
 
 		// Construct query to get data
-		$tablename = $wpdb->prefix . "wpnbm_data";
+		$tablename = $wpdb->prefix . "nbm_data";
 		$querydata = $wpdb->get_results("
-			SELECT `blog_id` , `user_role` , `blog_intended_use` FROM $tablename"
+			SELECT `blog_id` , `role` , `purpose` FROM $tablename"
 		);
                 
         $data = array();
@@ -189,7 +183,7 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 		foreach ($querydata as $querydatum ) {
 			foreach ($querydatum as $key => $val) {
 				if ($val == '') {
-					$querydatum->$key = 'null'; // Change out the null values for 'null'
+					$querydatum->$key = 'x'; // Change out the null values for 'x'
 				}
 			}
 		   array_push($data, (array)$querydatum);

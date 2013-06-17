@@ -1,11 +1,12 @@
 /*! $ script to hide certain form fields 
 
-	This is called on the admin menus only.
+	This is called on the admin menus only. --- Called on the blog form too...
 
 */
 
 (function($) {
 	$(document).ready(function() {
+		$('.hide_question').hide();
 		$('select[name="role"]').change(function() {
 			if ($(this).val() === "Professor") {
 				$('.student , .staff , .purpose').fadeOut(200);
