@@ -209,9 +209,6 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 			}
 			$querydatum = (array)$querydatum;
 
-			echo '<pre>';
-			print_r($querydatum);
-			echo '</pre>';
 			
 		   array_push($data, (array)$querydatum);
 		}
