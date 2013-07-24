@@ -182,8 +182,8 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
         $this->_column_headers = array($columns, $hidden, $sortable);
 
 		// Construct query to get data
-		$tablename = $wpdb->prefix . "nbm_data";
-        $blogs = $wpdb->prefix . "blogs";
+		$tablename = $wpdb->base_prefix . "nbm_data";
+        $blogs = $wpdb->base_prefix . "blogs";
 		$sql = '
 			SELECT ' . $tablename . '.blog_id , ' . $tablename . '.role , ' . $tablename . '.purpose , ' . $blogs . '.path , ' . $blogs . '.domain FROM ' . $tablename . '
 						INNER JOIN ' . $blogs . '
@@ -225,7 +225,7 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
         function usort_reorder($a,$b){
             $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'blog_id'; //If no sort, default to title
             $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'asc'; //If no order, default to asc
-            $result = strcmp($a[$orderby], $b[$orderby]); //Determine sort order
+            $result = strnatcmp($a[$orderby], $b[$orderby]); //Determine sort order
             return ($order==='asc') ? $result : -$result; //Send final sort direction to usort
         }
         usort($data, 'usort_reorder');
