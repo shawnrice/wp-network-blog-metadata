@@ -183,10 +183,11 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 
 		// Construct query to get data
 		$tablename = $wpdb->prefix . "nbm_data";
+        $blogs = $wpdb->prefix . "blogs";
 		$sql = '
-			SELECT ' . $tablename . '.blog_id , ' . $tablename . '.role , ' . $tablename . '.purpose , wp_blogs.path , wp_blogs.domain FROM ' . $tablename . '
-						INNER JOIN wp_blogs
-						ON ' . $tablename . '.blog_id=wp_blogs.blog_id
+			SELECT ' . $tablename . '.blog_id , ' . $tablename . '.role , ' . $tablename . '.purpose , ' . $blogs . '.path , ' . $blogs . '.domain FROM ' . $tablename . '
+						INNER JOIN ' . $blogs . '
+						ON ' . $tablename . '.blog_id=' . $blogs . '.blog_id
 		';
 		
 
@@ -194,7 +195,7 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 		$querydata = $wpdb->get_results($sql);
         
 		$blog_data = (array)$wpdb->get_results("
-			SELECT `blog_id` , `domain` , `path` FROM wp_blogs"
+			SELECT `blog_id` , `domain` , `path` FROM " . $blogs
 		);
 		
 
