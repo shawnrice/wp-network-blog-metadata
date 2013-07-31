@@ -275,7 +275,6 @@ function nbm_manage_menu() {
 			nbm_create_table();
 		}
 		
-
 		$row_exists = $wpdb->get_var('SELECT COUNT(*) from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id);
 
     if ( $_SERVER["REQUEST_METHOD"] == "POST" ) { 
@@ -669,6 +668,44 @@ function nbm_network_admin_table_tab() {
 	
 }
 
+add_action( 'init', 'nbm_check_for_csv_download' );
+function nbm_check_for_csv_download( $wp ) {
+
+    if ( ( isset($_GET['page']) && $_GET['page'] == 'nbm_answers' ) && ( isset($_GET['tab']) && $_GET['tab'] == 'export' ) ) {
+
+    	if ( isset($_POST['Download_CSV']) && $_POST['Download_CSV'] = 'Download CSV' ) {
+    		
+    		nbm_download_csv_blogs_meta();
+    	}
+	}
+
+}
+
+function nbm_download_csv_blogs_meta() {
+
+	global $wpdb;
+	$tablename = $wpdb->base_prefix . "nbm_data";
+
+	$table_exists = $wpdb->get_results("SHOW TABLES LIKE '".$tablename."'");
+	if (empty($table_exists)) { // Just make sure that the table doesn't exist already.
+		nbm_create_table();		// If not, create the table
+	}
+
+	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);				// Selects all the roles in the wpnbm_data table
+
+	$header = array( 	'blog_id' ,
+						'role'	,
+						'purpose' ,
+						'course_name' ,
+						'course_number',
+						'major',
+						'department'
+			);
+
+	nbm_array_to_csv_download( $data , $header , 'blog_metadata.csv' , ',' );
+
+
+}
 
 function nbm_network_admin_export_tab() {
 // The content for the "export" tab
@@ -684,6 +721,17 @@ function nbm_network_admin_export_tab() {
 
 	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);				// Selects all the roles in the wpnbm_data table
 
+	$header = array( 	'blog_id' ,
+						'role'	,
+						'purpose' ,
+						'course_name' ,
+						'course_number',
+						'major',
+						'department'
+			);
+
+	print_r($_POST);
+	print_r($_GET);
 ?>
 CSV:<br />
 -------------
@@ -701,7 +749,42 @@ foreach ($data as $datum) {
 -------------
 <br />
 End Preliminary CSV Data
+
+<p>
+<form method="post" action="">
+	<input type="submit" name="Download CSV" value="Download CSV">
+</form>
+</p>
 <?php
+}
+
+
+// init
+function nbm_array_to_csv_download($array, $header='', $filename = "blog_metadata.csv", $delimiter=",") {
+
+	// Add a datestamp to the front of the filename.
+	$filename = date('ymdHi') . '-' . $filename;
+
+    // open raw memory as file so no temp files needed
+    $f = fopen('php://memory', 'w'); 
+
+    //input the header
+    fputcsv($f, $header, $delimiter);
+
+    // loop over the input array
+    foreach ($array as $line) { 
+        // generate csv lines from the inner arrays
+        fputcsv($f, $line, $delimiter); 
+    }
+    // rewrind the "file" with the csv lines
+    fseek($f, 0);
+    // tell the browser it's going to be a csv file
+    header('Content-Type: application/csv');
+    // tell the browser we want to save it instead of displaying it
+    header('Content-Disposition: attachement; filename="'.$filename.'"');
+    // make php send the generated csv lines to the browser
+    fpassthru($f);
+    die();
 }
 
 
