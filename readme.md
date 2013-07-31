@@ -7,11 +7,11 @@ This plugin will collect and store metadata about blogs on a network install of 
 ### Todo
 * Re-populate after errors
 * Get actual data (list of departments, majors, etc...)
-* Install and uninstall hooks
+* Doublecheck Install and uninstall hooks
 * Separate Staff and Faculty "department"
 * Test for cross-browser compatibility
-* Convert admin menu form submission to an ajax callback function (_is this necessary?_)
 * Finish writing roadmap
+* Convert code to be read by doxygen
 
 
 ### Done
@@ -33,6 +33,17 @@ This plugin will collect and store metadata about blogs on a network install of 
 * ~~Test to make sure there are no conflicts with BuddyPress~~
 * ~~Create Network Admin Tableview~~
 * ~~Validate user signup fields* Return errors on fields~~ (not necessary for B@B)
+
+### Browsers checked
+* Safari (mac) 6
+* Chrome (mac) 27, 28
+* Firefox (mac) 21, 22
+
+### Browsers to check
+* IE
+* Chrome (PC)
+* Firefox (PC)
+
 
 #### Table design and implementation
 The current table is designed to include many questions that are in the draft document. Most of the columns are not used.
