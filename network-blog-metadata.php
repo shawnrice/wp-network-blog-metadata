@@ -252,6 +252,28 @@ function nbm_admin_scripts() {
 	wp_enqueue_style( 'nbm' );
 }
 
+function nbm_empty_settings_flag() {
+	// Add flag in case the nbm settings haven't been filled out.
+
+	global $wpdb, $blog_id;
+   	$tablename = $wpdb->base_prefix . "nbm_data"; // This is a site-wide table
+
+	// These next calls should be coming from the network admin on an install script or activation script or something like that...
+	// The creation of the table shouldn't exist in the regular user admin menus
+	$table_exists = $wpdb->get_results( "SHOW TABLES LIKE '" . $tablename . "'" );
+	if ( empty( $table_exists ) ) {
+		nbm_create_table();
+	}
+
+	$role = $wpdb->get_results( 'SELECT `role` from ' . $tablename . ' WHERE `blog_id` = ' . $blog_id );
+	if (empty($role[0]->role)) {
+		$url = site_url();
+		echo "<div id='my_admin_notice' class='updated fade'><p>".__('Please take a moment to fill out some information about your blog on the ')."<a href=\"$url/wp-admin/options-general.php?page=nbm_answers\">settings page</a>.</p></div>";
+    }
+}
+add_action('admin_notices', 'nbm_empty_settings_flag');
+
+
 function nbm_admin_menu() {				
 	// Hooks into the dashboard to create the per-site Admin Menu
 
@@ -371,7 +393,11 @@ function print_nbm_data() {
 
    <div class="wrap">
 
-    <div style="background: no-repeat url('wp-content/plugins/network-blog-metadata/images/data_32.png');" class="icon32"><br/></div>
+<?php 
+	$dir = plugins_url( 'images/data_32.png' , __FILE__ );
+   	echo '<div id="icon-themes" class="icon32" style="background: url(\''.$dir.'\') no-repeat; background-size: 95%;"><br></div>'; 
+?>
+
     <h2>Blog Metadata</h2>
 	<form method="post" class="standard-form" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 	<div id="nbm">
@@ -529,7 +555,7 @@ add_action('network_admin_menu', 'nbm_network_admin_menu');			// Adds the Networ
 function nbm_network_admin_menu() {									
 	// Hook to add in the Network Admin Menu
 	$dir = plugins_url( 'images/data_16.png' , __FILE__ );
-	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', $dir );
+	$page_hook_suffix = add_submenu_page( 'settings.php' , 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', $dir );
 
 }
 
@@ -719,21 +745,12 @@ function nbm_network_admin_export_tab() {
 		nbm_create_table();		// If not, create the table
 	}
 
-	$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);				// Selects all the roles in the wpnbm_data table
+	$data = $wpdb->get_results('SELECT * from ' . $tablename . ' LIMIT 0, 50', ARRAY_A);				// Selects all the roles in the wpnbm_data table
 
-	$header = array( 	'blog_id' ,
-						'role'	,
-						'purpose' ,
-						'course_name' ,
-						'course_number',
-						'major',
-						'department'
-			);
 
-	print_r($_POST);
-	print_r($_GET);
+
 ?>
-CSV:<br />
+CSV: (showing first 50 entries)<br />
 -------------
 <pre style="border: 1px dotted gray; padding: 20px; max-width: 800px;">
 blog_id,role,purpose,course_name,course_number,major,department
