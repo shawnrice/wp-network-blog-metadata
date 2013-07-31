@@ -500,7 +500,7 @@ function print_nbm_data() {
 			</select>
 		</div>
 		<div id="use_other" class="<?php if ( in_array( $data['purpose'] , $uses ) ) echo 'hide_question '; ?>use_other">
-			<label for="use_other"<?php if ( in_array( $data['purpose'] , $uses ) ) echo ' class="hide_question"';?>><?php _e( 'Please specify:' ) ?></label>				
+			<label for="use_other"><?php _e( 'Please specify:' ) ?></label>				
 			<input name="use_other" class="<?php if ( in_array( $data['purpose'] , $uses ) ) echo 'hide_question '; ?>purpose"<?php if ( !in_array( $data['purpose'] , $uses ) ) echo ' value="' . esc_html( $data['purpose'] ) . '"';?>>
 		</div>
 	</div>
