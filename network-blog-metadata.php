@@ -495,7 +495,7 @@ function print_nbm_data() {
 				<option <?php if ( $data['purpose'] == 'Research Blog' ) echo ' selected';?>>Research Blog</option>
 				<option <?php if ( $data['purpose'] == 'Portfolio' ) echo ' selected';?>>Portfolio</option>
 <?php			$purpose = $data['purpose'];?>
-<?php 			$uses = array( 'Personal Blog' , 'Research Blog' , 'Portfolio' , 'course_website' ); ?>
+<?php 			$uses = array( 'Personal Blog' , 'Research Blog' , 'Portfolio' , 'course_website' , '' ); ?>
 				<option <?php if ( !in_array( $data['purpose'] , $uses ) ) echo ' selected';?>>Other</option>
 			</select>
 		</div>
