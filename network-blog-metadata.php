@@ -13,6 +13,7 @@ License: GPL2
 
 
 // Hook the nbm_append_signup into the signup_blogform action
+add_action( 'wpmu_new_blog' , 'nbm_append_signup' , 10, 0);
 add_action( 'signup_blogform' , 'nbm_append_signup' , 10, 0);
 function nbm_append_signup() {
 // Function to append the form to the create a new blog page
@@ -253,7 +254,9 @@ function nbm_admin_scripts() {
 
 function nbm_admin_menu() {				
 	// Hooks into the dashboard to create the per-site Admin Menu
-    $page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', 'wp-content/plugins/network-blog-metadata/images/data_16.png' );
+
+	$dir = plugins_url( 'images/data_16.png' , __FILE__ );
+    $page_hook_suffix = add_options_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_manage_menu', $dir );
 
     add_action('admin_print_scripts-' . $page_hook_suffix, 'nbm_admin_scripts');
 }
@@ -526,13 +529,15 @@ For the Network Admin Menu
 add_action('network_admin_menu', 'nbm_network_admin_menu');			// Adds the Network Admin Menu
 function nbm_network_admin_menu() {									
 	// Hook to add in the Network Admin Menu
-	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', '../wp-content/plugins/network-blog-metadata/images/data_16.png' );
+	$dir = plugins_url( 'images/data_16.png' , __FILE__ );
+	$page_hook_suffix = add_menu_page( 'NBM Options', 'Network Blog Metadata', 'manage_options', 'nbm_answers', 'nbm_network_manage_menu', $dir );
 
 }
 
 function nbm_network_admin_tabs( $current = 'start' ) {
+	$dir=plugins_url( 'images/data_32.png' , __FILE__ );
     $tabs = array( 'general' => 'General', 'table' => 'Table View', 'export' => 'Export' );
-    echo '<div id="icon-themes" class="icon32"><br></div>';
+    echo '<div id="icon-themes" class="icon32" style="background: url(\''.$dir.'\') no-repeat; background-size: 95%;"><br></div>';
     echo '<h2 class="nav-tab-wrapper">';
     foreach( $tabs as $tab => $name ){
         $class = ( $tab == $current ) ? ' nav-tab-active' : '';
