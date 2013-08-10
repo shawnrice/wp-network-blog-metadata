@@ -969,7 +969,7 @@ function nbm_network_admin_export_tab() {
 CSV: (showing first 50 entries)<br />
 -------------
 <pre style="border: 1px dotted gray; padding: 20px; max-width: 800px;">
-blog_id,role,purpose,course_name,course_number,major,department
+blog_id,role,purpose,course_name,course_number,major,department,program
 <?php
 foreach ($data as $datum) {
 	foreach ( $datum as $val ) {
