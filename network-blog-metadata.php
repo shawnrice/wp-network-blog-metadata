@@ -718,11 +718,11 @@ function print_nbm_data() {
 				<option<?php if ( ( $data['role'] == 'Professor' ) && ( $data['purpose'] != 'course_website' ) ) echo ' selected';?>>No</option>
 			</select>
 		</div>
-		<div id="course_name" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['purpose'] == 'course_website' ) ) ) echo 'hide_question '; ?>course_website question">
+		<div id="course_name" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['purpose'] == 'course_website' ) ) ) echo 'hide_question '; ?>course_website professor question">
 			<label for="course_name"><?php _e( 'Course Name:' ) ?></label>
 			<input type="text" name="course_name" class="course_website professor" size="38"<?php if ( $data['course_name'] ) echo 'value="'.esc_html( $data['course_name'] ) .'"';?>>
 		</div>
-			<div id="course_number" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['purpose']== 'course_website' ) ) ) echo 'hide_question '; ?>course_website question">
+			<div id="course_number" class="<?php if (!( ( $data['role'] == 'Professor' ) && ( $data['purpose']== 'course_website' ) ) ) echo 'hide_question '; ?>course_website professor question">
 			<label for="course_number"><?php _e( 'Course number (and section, if you have it):' ) ?></label>				
 			<input type="text" name="course_number" class="course_website professor" size="16"<?php if ( $data['course_number'] ) echo 'value="'.esc_html( $data['course_number'] ) .'"';?>>
 		</div>
