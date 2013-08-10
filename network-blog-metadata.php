@@ -246,11 +246,11 @@ function nbm_append_signup() {
 				<option<?php if ( ( $nbm_err['role'] == 'Professor' ) && ( $nbm_err['course_website'] == 'No' ) ) echo ' selected';?>>No</option>
 			</select>
 		</div>
-		<div id="course_name" class="<?php if (!( ( $nbm_err['role'] == 'Professor' ) && ( $nbm_err['course_website'] == 'Yes' ) ) ) echo 'hide_question '; ?>course_website question">
+		<div id="course_name" class="<?php if (!( ( $nbm_err['role'] == 'Professor' ) && ( $nbm_err['course_website'] == 'Yes' ) ) ) echo 'hide_question '; ?>course_website professor question">
 			<label for="course_name"><?php _e( 'Course Name:' ) ?></label>
 			<input type="text" name="course_name" class="course_website professor" size="38"<?php if ( $nbm_err['course_name'] ) echo 'value="'.esc_html( $nbm_err['course_name'] ) .'"';?>>
 		</div>
-			<div id="course_number" class="<?php if (!( ( $nbm_err['role'] == 'Professor' ) && ( $nbm_err['course_website']== 'Yes' ) ) ) echo 'hide_question '; ?>course_website question">
+			<div id="course_number" class="<?php if (!( ( $nbm_err['role'] == 'Professor' ) && ( $nbm_err['course_website']== 'Yes' ) ) ) echo 'hide_question '; ?>course_website professor question">
 			<label for="course_number"><?php _e( 'Course number (and section, if you have it):' ) ?></label>				
 			<input type="text" name="course_number" class="course_website professor" size="16"<?php if ( $nbm_err['course_number'] ) echo 'value="'.esc_html( $nbm_err['course_number'] ) .'"';?>>
 		</div>
