@@ -17,14 +17,14 @@
 			else if ($(this).val() === "Student") {
 				$('.professor , .staff, .professor-staff , .course_website').fadeOut(200);
 				// Reset some values if they were put in...
-				$('.professor , .staff , .professor-staff , course_website input').val('');
+				$('.professor , .staff , .professor-staff , .course_website input').val('');
 				$('.professor , .professor-staff select').val('');
 
 				setTimeout(function(){
 					$('.student , .purpose').fadeIn(200);}, 200);
 			}
 			else if ($(this).val() === "Staff") {
-				$('.professor , .student').fadeOut(200);		
+				$('.professor , .course_website, .student').fadeOut(200);		
 				// Reset some values if they were put in...
 				$('.course_website , .professor , .student input').val('');
 				$('.course_website , .student select').val('');
