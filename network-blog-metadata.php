@@ -28,12 +28,15 @@ function nbm_append_signup() {
 		$nbm_err['role'] = $_POST['role'];
 		$nbm_err['department'] = $_POST['department'];
 		$nbm_err['major'] = $_POST['major'];
+		$nbm_err['program'] = $_POST['program'];
 		$nbm_err['course_website'] = $_POST['course_website'];
 		$nbm_err['course_name'] = $_POST['course_name'];
 		$nbm_err['course_number'] = $_POST['course_number'];
 		$nbm_err['purpose'] = $_POST['purpose'];
 		$nbm_err['use_other'] = $_POST['use_other'];
 	}
+
+	if (! ( isset( $_POST['submit'] ) && ( $_POST['submit'] == 'Create Site' ) ) ) {
 	?>
 	<h4>Metadata:</h4>
 	<div id="nbm">
@@ -49,9 +52,9 @@ function nbm_append_signup() {
 				<option<?php if ( $nbm_err['role'] == 'Staff' ) echo ' selected';?>>Staff</option>
 			</select></p>
 		</div>
-		<div id="department" class="<?php if (!( ( $nbm_err['role'] == 'Professor' ) || ( $nbm_err['role'] == 'Staff' ) ) ) echo 'hide_question '; ?>professor-staff question">
+		<div id="department" class="<?php if (!( $nbm_err['role'] == 'Professor' ) ) echo 'hide_question '; ?>professor question">
 			<label for="department"><?php _e( 'Department:' ) ?></label>				
-			<select name="department" class="professor-staff">
+			<select name="department" class="professor">
 				<option value="">---</option>
 				<option <?php if ( $nbm_err['department'] == "Accountancy") echo 'selected';?>>Accountancy</option>
 				<option <?php if ( $nbm_err['department'] == "American Studies") echo 'selected';?>>American Studies</option>
@@ -95,43 +98,146 @@ function nbm_append_signup() {
 				<option value="">---</option>
 				<option<?php if ( $nbm_err['major'] == "Undeclared") echo " selected";?>>Undeclared</option>
 				<option<?php if ( $nbm_err['major'] == "Accountancy") echo " selected";?>>Accountancy</option>
-				<option<?php if ( $nbm_err['major'] == "Ad Hoc Major") echo " selected";?>>Ad Hoc Major</option>
+				<option<?php if ( $nbm_err['major'] == "Arts and Sciences Ad Hoc Major") echo " selected";?>>Arts and Sciences Ad Hoc Major</option>
 				<option<?php if ( $nbm_err['major'] == "Actuarial Science") echo " selected";?>>Actuarial Science</option>
-				<option<?php if ( $nbm_err['major'] == "Art History and Theatre (Ad Hoc)") echo " selected";?>>Art History and Theatre (Ad Hoc)</option>
-				<option<?php if ( $nbm_err['major'] == "Arts Administration (Ad Hoc)") echo " selected";?>>Arts Administration (Ad Hoc)</option>
-				<option<?php if ( $nbm_err['major'] == "Asian & Asian American Studies (Ad Hoc)") echo " selected";?>>Asian & Asian American Studies (Ad Hoc)</option>
-				<option<?php if ( $nbm_err['major'] == "Biological Sciences") echo " selected";?>>Biological Sciences</option>
+				<option<?php if ( $nbm_err['major'] == "Biological and Natural Sciences") echo " selected";?>>Biological and Natural Sciences</option>
+				<option<?php if ( $nbm_err['major'] == "Business Communication") echo " selected";?>>Business Communication</option>
 				<option<?php if ( $nbm_err['major'] == "Business Journalism") echo " selected";?>>Business Journalism</option>
 				<option<?php if ( $nbm_err['major'] == "Business Writing") echo " selected";?>>Business Writing</option>
-				<option<?php if ( $nbm_err['major'] == "Computer Information Systems") echo " selected";?>>Computer Information Systems</option>
 				<option<?php if ( $nbm_err['major'] == "Corporate Communication") echo " selected";?>>Corporate Communication</option>
+				<option<?php if ( $nbm_err['major'] == "Computer Information Systems") echo " selected";?>>Computer Information Systems</option>
 				<option<?php if ( $nbm_err['major'] == "Economics") echo " selected";?>>Economics</option>
 				<option<?php if ( $nbm_err['major'] == "English") echo " selected";?>>English</option>
 				<option<?php if ( $nbm_err['major'] == "Finance") echo " selected";?>>Finance</option>
 				<option<?php if ( $nbm_err['major'] == "Graphic Communication") echo " selected";?>>Graphic Communication</option>
 				<option<?php if ( $nbm_err['major'] == "History") echo " selected";?>>History</option>
-				<option<?php if ( $nbm_err['major'] == "Industrial/Organizational Psychology") echo " selected";?>>Industrial/Organizational Psychology</option>
+				<option<?php if ( $nbm_err['major'] == "Industrial and Organizational Psychology") echo " selected";?>>Industrial and Organizational Psychology</option>
 				<option<?php if ( $nbm_err['major'] == "International Business") echo " selected";?>>International Business</option>
 				<option<?php if ( $nbm_err['major'] == "Journalism") echo " selected";?>>Journalism</option>
+				<option<?php if ( $nbm_err['major'] == "Journalism and Creative Writing") echo " selected";?>>Journalism and Creative Writing</option>
 				<option<?php if ( $nbm_err['major'] == "Management") echo " selected";?>>Management</option>
-				<option<?php if ( $nbm_err['major'] == "Management of Musical Enterprises") echo " selected";?>>Management of Musical Enterprises</option>
 				<option<?php if ( $nbm_err['major'] == "Marketing Management") echo " selected";?>>Marketing Management</option>
 				<option<?php if ( $nbm_err['major'] == "Mathematics") echo " selected";?>>Mathematics</option>
-				<option<?php if ( $nbm_err['major'] == "Modern Languages & Comparative Literature (Ad Hoc)") echo " selected";?>>Modern Languages & Comparative Literature (Ad Hoc)</option>
-				<option<?php if ( $nbm_err['major'] == "Music") echo " selected";?>>Music</option>
-				<option<?php if ( $nbm_err['major'] == "Natural Sciences (Ad Hoc)") echo " selected";?>>Natural Sciences (Ad Hoc)</option>
+				<option<?php if ( $nbm_err['major'] == "Music") echo " selected";?>>Music (including Management of Musical Enterprises)</option>
 				<option<?php if ( $nbm_err['major'] == "Philosophy") echo " selected";?>>Philosophy</option>
 				<option<?php if ( $nbm_err['major'] == "Political Science") echo " selected";?>>Political Science</option>
 				<option<?php if ( $nbm_err['major'] == "Psychology") echo " selected";?>>Psychology</option>
 				<option<?php if ( $nbm_err['major'] == "Public Affairs") echo " selected";?>>Public Affairs</option>
-				<option<?php if ( $nbm_err['major'] == "Real Estate") echo " selected";?>>Real Estate</option>
-				<option<?php if ( $nbm_err['major'] == "Religion and Culture (Ad Hoc)") echo " selected";?>>Religion and Culture (Ad Hoc)</option>
+				<option<?php if ( $nbm_err['major'] == "Quantitative Methods and Modeling") echo " selected";?>>Quantitative Methods and Modeling</option>
+				<option<?php if ( $nbm_err['major'] == "Real Estate and Metropolitan Development") echo " selected";?>>Real Estate and Metropolitan Development</option>
 				<option<?php if ( $nbm_err['major'] == "Sociology") echo " selected";?>>Sociology</option>
 				<option<?php if ( $nbm_err['major'] == "Spanish") echo " selected";?>>Spanish</option>
-				<option<?php if ( $nbm_err['major'] == "Statistics") echo " selected";?>>Statistics</option>
-				<option<?php if ( $nbm_err['major'] == "Statistics & Quantitative Modeling") echo " selected";?>>Statistics & Quantitative Modeling</option>
+				<option<?php if ( $nbm_err['major'] == "Statistics") echo " selected";?>>Statistics (BA)</option>
+				<option<?php if ( $nbm_err['major'] == "Statistics and Quantitative Modeling") echo " selected";?>>Statistics and Quantitative Modeling (BBA)</option>
 			</select>
 		</div>
+
+		<div id="staff" class="<?php if (!( $nbm_err['role'] == 'Staff' ) ) echo 'hide_question ';?> staff question">
+			<label for="program"><?php _e( 'Program:' ) ?></label>				
+			<select name="program" class="staff">
+				<option value="">---</option>
+				<option <?php if ( $nbm_err['program'] == "Accountancy (MS)") echo 'selected';?>>Accountancy (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "Accountancy and CPA (MBA)") echo 'selected';?>>Accountancy and CPA (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "American Studies Program") echo 'selected';?>>American Studies Program</option>
+				<option <?php if ( $nbm_err['program'] == "Arts and Sciences Ad Hoc Programs") echo 'selected';?>>Arts and Sciences Ad Hoc Programs</option>
+				<option <?php if ( $nbm_err['program'] == "Asian and Asian American Studies") echo 'selected';?>>Asian and Asian American Studies</option>
+				<option <?php if ( $nbm_err['program'] == "Baruch Survey Research Unit") echo 'selected';?>>Baruch Survey Research Unit</option>
+				<option <?php if ( $nbm_err['program'] == "Bernard L. Schwartz Communication Institute") echo 'selected';?>>Bernard L. Schwartz Communication Institute</option>
+				<option <?php if ( $nbm_err['program'] == "Bert W. Wasserman Department of Economics and Finance") echo 'selected';?>>Bert W. Wasserman Department of Economics and Finance</option>
+				<option <?php if ( $nbm_err['program'] == "CCI - Corporate Communication International") echo 'selected';?>>CCI - Corporate Communication International</option>
+				<option <?php if ( $nbm_err['program'] == "Center for Equality, Pluralism and Policy") echo 'selected';?>>Center for Equality, Pluralism and Policy</option>
+				<option <?php if ( $nbm_err['program'] == "Center for Innovation and Leadership in Government") echo 'selected';?>>Center for Innovation and Leadership in Government</option>
+				<option <?php if ( $nbm_err['program'] == "Center for Nonprofit Strategy and Management") echo 'selected';?>>Center for Nonprofit Strategy and Management</option>
+				<option <?php if ( $nbm_err['program'] == "Center for the Study of Business and Government (CSBG)") echo 'selected';?>>Center for the Study of Business and Government (CSBG)</option>
+				<option <?php if ( $nbm_err['program'] == "Computer Center for Visually Impaired People") echo 'selected';?>>Computer Center for Visually Impaired People</option>
+				<option <?php if ( $nbm_err['program'] == "Continuing and Professional Studies") echo 'selected';?>>Continuing and Professional Studies</option>
+				<option <?php if ( $nbm_err['program'] == "CUNY Institute for Demographic Research") echo 'selected';?>>CUNY Institute for Demographic Research</option>
+				<option <?php if ( $nbm_err['program'] == "Decision Sciences") echo 'selected';?>>Decision Sciences</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Black and Latino Studies") echo 'selected';?>>Department of Black and Latino Studies</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Communication Studies") echo 'selected';?>>Department of Communication Studies</option>
+				<option <?php if ( $nbm_err['program'] == "Department of English") echo 'selected';?>>Department of English</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Fine and Performing Arts") echo 'selected';?>>Department of Fine and Performing Arts</option>
+				<option <?php if ( $nbm_err['program'] == "Department of History") echo 'selected';?>>Department of History</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Journalism and the Writing Professions") echo 'selected';?>>Department of Journalism and the Writing Professions</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Law") echo 'selected';?>>Department of Law</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Management") echo 'selected';?>>Department of Management</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Marketing and International Business") echo 'selected';?>>Department of Marketing and International Business</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Mathematics") echo 'selected';?>>Department of Mathematics</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Modern Languages and Comparative Literature") echo 'selected';?>>Department of Modern Languages and Comparative Literature</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Natural Sciences") echo 'selected';?>>Department of Natural Sciences</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Philosophy") echo 'selected';?>>Department of Philosophy</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Political Science") echo 'selected';?>>Department of Political Science</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Psychology") echo 'selected';?>>Department of Psychology</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Sociology and Anthropology") echo 'selected';?>>Department of Sociology and Anthropology</option>
+				<option <?php if ( $nbm_err['program'] == "Department of Statistics and Computer Information Systems") echo 'selected';?>>Department of Statistics and Computer Information Systems</option>
+				<option <?php if ( $nbm_err['program'] == "Dual-Degree Program in Nursing Administration and Public Administration") echo 'selected';?>>Dual-Degree Program in Nursing Administration and Public Administration</option>
+				<option <?php if ( $nbm_err['program'] == "Economics") echo 'selected';?>>Economics</option>
+				<option <?php if ( $nbm_err['program'] == "Education Program") echo 'selected';?>>Education Program</option>
+				<option <?php if ( $nbm_err['program'] == "Entrepreneurship (MS)") echo 'selected';?>>Entrepreneurship (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MBA Program") echo 'selected';?>>Executive MBA Program</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MPA") echo 'selected';?>>Executive MPA</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MS in Analysis of Financial Statements, Internal Operations, and Risk Assessment") echo 'selected';?>>Executive MS in Analysis of Financial Statements, Internal Operations, and Risk Assessment</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MS in Business Computer Information Systems") echo 'selected';?>>Executive MS in Business Computer Information Systems</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MS in Finance") echo 'selected';?>>Executive MS in Finance</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MS in Industrial and Labor Relations (MSILR)") echo 'selected';?>>Executive MS in Industrial and Labor Relations (MSILR)</option>
+				<option <?php if ( $nbm_err['program'] == "Executive MS in Taxation") echo 'selected';?>>Executive MS in Taxation</option>
+				<option <?php if ( $nbm_err['program'] == "Film Studies Program") echo 'selected';?>>Film Studies Program</option>
+				<option <?php if ( $nbm_err['program'] == "Finance") echo 'selected';?>>Finance</option>
+				<option <?php if ( $nbm_err['program'] == "General MBA Option") echo 'selected';?>>General MBA Option</option>
+				<option <?php if ( $nbm_err['program'] == "Global Studies Program") echo 'selected';?>>Global Studies Program</option>
+				<option <?php if ( $nbm_err['program'] == "Health Care Administration") echo 'selected';?>>Health Care Administration</option>
+				<option <?php if ( $nbm_err['program'] == "Industrial and Organizational Psychology") echo 'selected';?>>Industrial and Organizational Psychology</option>
+				<option <?php if ( $nbm_err['program'] == "Information Systems (MBA)") echo 'selected';?>>Information Systems (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "Information Systems (MS)") echo 'selected';?>>Information Systems (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "Interdisciplinary Programs and Courses") echo 'selected';?>>Interdisciplinary Programs and Courses</option>
+				<option <?php if ( $nbm_err['program'] == "International Business") echo 'selected';?>>International Business</option>
+				<option <?php if ( $nbm_err['program'] == "Jewish Studies Center") echo 'selected';?>>Jewish Studies Center</option>
+				<option <?php if ( $nbm_err['program'] == "Jewish Studies Program") echo 'selected';?>>Jewish Studies Program</option>
+				<option <?php if ( $nbm_err['program'] == "Joint JD and MBA Program (external)") echo 'selected';?>>Joint JD and MBA Program (external)</option>
+				<option <?php if ( $nbm_err['program'] == "Latin American and Caribbean Studies") echo 'selected';?>>Latin American and Caribbean Studies</option>
+				<option <?php if ( $nbm_err['program'] == "Lawrence N. Field Center for Entrepreneurship") echo 'selected';?>>Lawrence N. Field Center for Entrepreneurship</option>
+				<option <?php if ( $nbm_err['program'] == "Library Department") echo 'selected';?>>Library Department</option>
+				<option <?php if ( $nbm_err['program'] == "MA in Corporate Communication") echo 'selected';?>>MA in Corporate Communication</option>
+				<option <?php if ( $nbm_err['program'] == "MA in Mental Health Counseling") echo 'selected';?>>MA in Mental Health Counseling</option>
+				<option <?php if ( $nbm_err['program'] == "Management and Entrepreneurship (MBA)") echo 'selected';?>>Management and Entrepreneurship (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "Management and Operations Management") echo 'selected';?>>Management and Operations Management</option>
+				<option <?php if ( $nbm_err['program'] == "Management and Organizational Behavior-Human Resource Management") echo 'selected';?>>Management and Organizational Behavior-Human Resource Management</option>
+				<option <?php if ( $nbm_err['program'] == "Management and Sustainable Business") echo 'selected';?>>Management and Sustainable Business</option>
+				<option <?php if ( $nbm_err['program'] == "Marketing (MBA)") echo 'selected';?>>Marketing (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "Marketing (MS)") echo 'selected';?>>Marketing (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "Master of Public Administration Program") echo 'selected';?>>Master of Public Administration Program</option>
+				<option <?php if ( $nbm_err['program'] == "MS in Financial Engineering") echo 'selected';?>>MS in Financial Engineering</option>
+				<option <?php if ( $nbm_err['program'] == "MS in Industrial and Organizational Psychology") echo 'selected';?>>MS in Industrial and Organizational Psychology</option>
+				<option <?php if ( $nbm_err['program'] == "MSEd in Educational Leadership") echo 'selected';?>>MSEd in Educational Leadership</option>
+				<option <?php if ( $nbm_err['program'] == "MSEd in Higher Education Administration") echo 'selected';?>>MSEd in Higher Education Administration</option>
+				<option <?php if ( $nbm_err['program'] == "MSEd Programs (SPA)") echo 'selected';?>>MSEd Programs (SPA)</option>
+				<option <?php if ( $nbm_err['program'] == "National Urban Fellows — MPA") echo 'selected';?>>National Urban Fellows — MPA</option>
+				<option <?php if ( $nbm_err['program'] == "New York Census Research Data Center") echo 'selected';?>>New York Census Research Data Center</option>
+				<option <?php if ( $nbm_err['program'] == "Physical and Health Education") echo 'selected';?>>Physical and Health Education</option>
+				<option <?php if ( $nbm_err['program'] == "Public Affairs Program") echo 'selected';?>>Public Affairs Program</option>
+				<option <?php if ( $nbm_err['program'] == "Quantitative Methods and Modeling") echo 'selected';?>>Quantitative Methods and Modeling</option>
+				<option <?php if ( $nbm_err['program'] == "Real Estate (MBA)") echo 'selected';?>>Real Estate (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "Real Estate (MS)") echo 'selected';?>>Real Estate (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "Real Estate Program") echo 'selected';?>>Real Estate Program</option>
+				<option <?php if ( $nbm_err['program'] == "Religion and Culture Program") echo 'selected';?>>Religion and Culture Program</option>
+				<option <?php if ( $nbm_err['program'] == "Robert Zicklin Center for Corporate Integrity") echo 'selected';?>>Robert Zicklin Center for Corporate Integrity</option>
+				<option <?php if ( $nbm_err['program'] == "School of Public Affairs") echo 'selected';?>>School of Public Affairs</option>
+				<option <?php if ( $nbm_err['program'] == "Stan Ross Department of Accountancy") echo 'selected';?>>Stan Ross Department of Accountancy</option>
+				<option <?php if ( $nbm_err['program'] == "Statistics (MBA)") echo 'selected';?>>Statistics (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "Statistics (MS)") echo 'selected';?>>Statistics (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "Steven L. Newman Real Estate Institute") echo 'selected';?>>Steven L. Newman Real Estate Institute</option>
+				<option <?php if ( $nbm_err['program'] == "Taxation (MBA)") echo 'selected';?>>Taxation (MBA)</option>
+				<option <?php if ( $nbm_err['program'] == "Taxation (MS)") echo 'selected';?>>Taxation (MS)</option>
+				<option <?php if ( $nbm_err['program'] == "The Baruch MBA in Health Care Administration") echo 'selected';?>>The Baruch MBA in Health Care Administration</option>
+				<option <?php if ( $nbm_err['program'] == "The Professional Certificate in Taxation (PCT)") echo 'selected';?>>The Professional Certificate in Taxation (PCT)</option>
+				<option <?php if ( $nbm_err['program'] == "Wasserman Trading Floor and Subotnick Financial Services Center") echo 'selected';?>>Wasserman Trading Floor and Subotnick Financial Services Center</option>
+				<option <?php if ( $nbm_err['program'] == "Weissman Center for International Business") echo 'selected';?>>Weissman Center for International Business</option>
+				<option <?php if ( $nbm_err['program'] == "Weissman School of Arts and Sciences") echo 'selected';?>>Weissman School of Arts and Sciences</option>
+				<option <?php if ( $nbm_err['program'] == "Women's Studies Program") echo 'selected';?>>Women's Studies Program</option>
+				<option <?php if ( $nbm_err['program'] == "Zicklin School Of Business") echo 'selected';?>>Zicklin School Of Business</option>
+			</select>
+		</div>
+
 		<div id="course_website" class="<?php if (!( $nbm_err['role'] == 'Professor' ) ) echo 'hide_question '; ?>professor question">
 			<label for="course_website"><?php _e( 'Is this a course website?' ) ?></label>				
 			<select name="course_website" class="professor">
@@ -168,6 +274,7 @@ function nbm_append_signup() {
 		<p>&nbsp;</p>
 	</div>
 		<?php
+	}
 }
 
 // When the new site is finally created (user has followed the activation link provided via e-mail), add a row to the options table with the value he submitted during signup
@@ -215,7 +322,8 @@ function process_nbm_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id
 						`course_name` = ' . $_POST["course_name"] . ',
 						`course_number` = ' . $_POST["course_number"] . ',
 						`major` = ' . $_POST["major"] . ',
-						`department` = ' . $_POST["department"] . '
+						`department` = ' . $_POST["department"] . ',
+						`program` = ' . $_POST["program"] . '
 						WHERE `blog_id` = ' . $blog_id;
 			} else {
 				$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
@@ -225,7 +333,8 @@ function process_nbm_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id
 						$_POST["course_name"] . ', ' .
 						$_POST["course_number"] . ', ' . '
 						`major` = ' . $_POST["major"] . ', 
-						`department` = ' . $_POST["department"] . ')';
+						`department` = ' . $_POST["department"] . ',
+						`program` = ' . $_POST["program"] . ')';
 			}
 			$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
 		}
@@ -329,7 +438,8 @@ function nbm_manage_menu() {
 					`course_name` = ' . $_POST["course_name"] . ',
 					`course_number` = ' . $_POST["course_number"] . ',
 					`major` = ' . $_POST["major"] . ',
-					`department` = ' . $_POST["department"] . '  WHERE `blog_id` = ' . $blog_id;
+					`department` = ' . $_POST["department"] . ',
+					`program` = ' . $_POST["program"] . ' WHERE `blog_id` = ' . $blog_id;
 		} else {
 			$sql = 'INSERT INTO ' . $tablename . ' VALUES (' .
 				$blog_id . ', ' .
@@ -384,10 +494,11 @@ function print_nbm_data() {
 	// Setup the SQL query
 		$sql = 	'SELECT * from ' . $tablename .
 				' WHERE `blog_id` = ' . $blog_id;
-			
+		
 		$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
 			
 		ob_start();	// Put this into an output buffer so that we can return the entire text to whichever function needs it.
+		 nbm_update_sql_table(); // minor check that will be taken out soon. !!!!!!!
 
 ?>
 
@@ -405,6 +516,7 @@ function print_nbm_data() {
 			<span><p>Please take a moment to tell us a little bit about your <strong>Blogs @ Baruch site</strong>. This information will be available only to the <strong>B@B</strong> administrators and will be used simply to help us understand how our users are using our site in order to determine how we can improve the overall experience for our current and future users. You can change these answers later.</p></span>
 		</div>
 		<div>
+		<div>
 			<label for="role"><?php _e( 'Role:' ) ?></label>				
 			<p><select name="role" id="role">
 				<option value="">---</option>
@@ -413,9 +525,9 @@ function print_nbm_data() {
 				<option<?php if ( $data['role'] == 'Staff' ) echo ' selected';?>>Staff</option>
 			</select></p>
 		</div>
-		<div id="department" class="<?php if (!( ( $data['role'] == 'Professor' ) || ( $data['role'] == 'Staff' ) ) ) echo 'hide_question '; ?>professor-staff question">
+		<div id="department" class="<?php if (!( $data['role'] == 'Professor' ) ) echo 'hide_question '; ?>professor question">
 			<label for="department"><?php _e( 'Department:' ) ?></label>				
-			<select name="department" class="professor-staff">
+			<select name="department" class="professor">
 				<option value="">---</option>
 				<option <?php if ( $data['department'] == "Accountancy") echo 'selected';?>>Accountancy</option>
 				<option <?php if ( $data['department'] == "American Studies") echo 'selected';?>>American Studies</option>
@@ -459,41 +571,143 @@ function print_nbm_data() {
 				<option value="">---</option>
 				<option<?php if ( $data['major'] == "Undeclared") echo " selected";?>>Undeclared</option>
 				<option<?php if ( $data['major'] == "Accountancy") echo " selected";?>>Accountancy</option>
-				<option<?php if ( $data['major'] == "Ad Hoc Major") echo " selected";?>>Ad Hoc Major</option>
+				<option<?php if ( $data['major'] == "Arts and Sciences Ad Hoc Major") echo " selected";?>>Arts and Sciences Ad Hoc Major</option>
 				<option<?php if ( $data['major'] == "Actuarial Science") echo " selected";?>>Actuarial Science</option>
-				<option<?php if ( $data['major'] == "Art History and Theatre (Ad Hoc)") echo " selected";?>>Art History and Theatre (Ad Hoc)</option>
-				<option<?php if ( $data['major'] == "Arts Administration (Ad Hoc)") echo " selected";?>>Arts Administration (Ad Hoc)</option>
-				<option<?php if ( $data['major'] == "Asian & Asian American Studies (Ad Hoc)") echo " selected";?>>Asian & Asian American Studies (Ad Hoc)</option>
-				<option<?php if ( $data['major'] == "Biological Sciences") echo " selected";?>>Biological Sciences</option>
+				<option<?php if ( $data['major'] == "Biological and Natural Sciences") echo " selected";?>>Biological and Natural Sciences</option>
+				<option<?php if ( $data['major'] == "Business Communication") echo " selected";?>>Business Communication</option>
 				<option<?php if ( $data['major'] == "Business Journalism") echo " selected";?>>Business Journalism</option>
 				<option<?php if ( $data['major'] == "Business Writing") echo " selected";?>>Business Writing</option>
-				<option<?php if ( $data['major'] == "Computer Information Systems") echo " selected";?>>Computer Information Systems</option>
 				<option<?php if ( $data['major'] == "Corporate Communication") echo " selected";?>>Corporate Communication</option>
+				<option<?php if ( $data['major'] == "Computer Information Systems") echo " selected";?>>Computer Information Systems</option>
 				<option<?php if ( $data['major'] == "Economics") echo " selected";?>>Economics</option>
 				<option<?php if ( $data['major'] == "English") echo " selected";?>>English</option>
 				<option<?php if ( $data['major'] == "Finance") echo " selected";?>>Finance</option>
 				<option<?php if ( $data['major'] == "Graphic Communication") echo " selected";?>>Graphic Communication</option>
 				<option<?php if ( $data['major'] == "History") echo " selected";?>>History</option>
-				<option<?php if ( $data['major'] == "Industrial/Organizational Psychology") echo " selected";?>>Industrial/Organizational Psychology</option>
+				<option<?php if ( $data['major'] == "Industrial and Organizational Psychology") echo " selected";?>>Industrial and Organizational Psychology</option>
 				<option<?php if ( $data['major'] == "International Business") echo " selected";?>>International Business</option>
 				<option<?php if ( $data['major'] == "Journalism") echo " selected";?>>Journalism</option>
+				<option<?php if ( $data['major'] == "Journalism and Creative Writing") echo " selected";?>>Journalism and Creative Writing</option>
 				<option<?php if ( $data['major'] == "Management") echo " selected";?>>Management</option>
-				<option<?php if ( $data['major'] == "Management of Musical Enterprises") echo " selected";?>>Management of Musical Enterprises</option>
 				<option<?php if ( $data['major'] == "Marketing Management") echo " selected";?>>Marketing Management</option>
 				<option<?php if ( $data['major'] == "Mathematics") echo " selected";?>>Mathematics</option>
-				<option<?php if ( $data['major'] == "Modern Languages & Comparative Literature (Ad Hoc)") echo " selected";?>>Modern Languages & Comparative Literature (Ad Hoc)</option>
-				<option<?php if ( $data['major'] == "Music") echo " selected";?>>Music</option>
-				<option<?php if ( $data['major'] == "Natural Sciences (Ad Hoc)") echo " selected";?>>Natural Sciences (Ad Hoc)</option>
+				<option<?php if ( $data['major'] == "Music") echo " selected";?>>Music (including Management of Musical Enterprises)</option>
 				<option<?php if ( $data['major'] == "Philosophy") echo " selected";?>>Philosophy</option>
 				<option<?php if ( $data['major'] == "Political Science") echo " selected";?>>Political Science</option>
 				<option<?php if ( $data['major'] == "Psychology") echo " selected";?>>Psychology</option>
 				<option<?php if ( $data['major'] == "Public Affairs") echo " selected";?>>Public Affairs</option>
-				<option<?php if ( $data['major'] == "Real Estate") echo " selected";?>>Real Estate</option>
-				<option<?php if ( $data['major'] == "Religion and Culture (Ad Hoc)") echo " selected";?>>Religion and Culture (Ad Hoc)</option>
+				<option<?php if ( $data['major'] == "Quantitative Methods and Modeling") echo " selected";?>>Quantitative Methods and Modeling</option>
+				<option<?php if ( $data['major'] == "Real Estate and Metropolitan Development") echo " selected";?>>Real Estate and Metropolitan Development</option>
 				<option<?php if ( $data['major'] == "Sociology") echo " selected";?>>Sociology</option>
 				<option<?php if ( $data['major'] == "Spanish") echo " selected";?>>Spanish</option>
-				<option<?php if ( $data['major'] == "Statistics") echo " selected";?>>Statistics</option>
-				<option<?php if ( $data['major'] == "Statistics & Quantitative Modeling") echo " selected";?>>Statistics & Quantitative Modeling</option>
+				<option<?php if ( $data['major'] == "Statistics") echo " selected";?>>Statistics (BA)</option>
+				<option<?php if ( $data['major'] == "Statistics and Quantitative Modeling") echo " selected";?>>Statistics and Quantitative Modeling (BBA)</option>
+			</select>
+		</div>
+
+		<div id="staff" class="<?php if (!( $data['role'] == 'Staff' ) ) echo 'hide_question ';?> staff question">
+			<label for="program"><?php _e( 'Program:' ) ?></label>				
+			<select name="program" class="staff">
+				<option value="">---</option>
+				<option <?php if ( $data['program'] == "Accountancy (MS)") echo 'selected';?>>Accountancy (MS)</option>
+				<option <?php if ( $data['program'] == "Accountancy and CPA (MBA)") echo 'selected';?>>Accountancy and CPA (MBA)</option>
+				<option <?php if ( $data['program'] == "American Studies Program") echo 'selected';?>>American Studies Program</option>
+				<option <?php if ( $data['program'] == "Arts and Sciences Ad Hoc Programs") echo 'selected';?>>Arts and Sciences Ad Hoc Programs</option>
+				<option <?php if ( $data['program'] == "Asian and Asian American Studies") echo 'selected';?>>Asian and Asian American Studies</option>
+				<option <?php if ( $data['program'] == "Baruch Survey Research Unit") echo 'selected';?>>Baruch Survey Research Unit</option>
+				<option <?php if ( $data['program'] == "Bernard L. Schwartz Communication Institute") echo 'selected';?>>Bernard L. Schwartz Communication Institute</option>
+				<option <?php if ( $data['program'] == "Bert W. Wasserman Department of Economics and Finance") echo 'selected';?>>Bert W. Wasserman Department of Economics and Finance</option>
+				<option <?php if ( $data['program'] == "CCI - Corporate Communication International") echo 'selected';?>>CCI - Corporate Communication International</option>
+				<option <?php if ( $data['program'] == "Center for Equality, Pluralism and Policy") echo 'selected';?>>Center for Equality, Pluralism and Policy</option>
+				<option <?php if ( $data['program'] == "Center for Innovation and Leadership in Government") echo 'selected';?>>Center for Innovation and Leadership in Government</option>
+				<option <?php if ( $data['program'] == "Center for Nonprofit Strategy and Management") echo 'selected';?>>Center for Nonprofit Strategy and Management</option>
+				<option <?php if ( $data['program'] == "Center for the Study of Business and Government (CSBG)") echo 'selected';?>>Center for the Study of Business and Government (CSBG)</option>
+				<option <?php if ( $data['program'] == "Computer Center for Visually Impaired People") echo 'selected';?>>Computer Center for Visually Impaired People</option>
+				<option <?php if ( $data['program'] == "Continuing and Professional Studies") echo 'selected';?>>Continuing and Professional Studies</option>
+				<option <?php if ( $data['program'] == "CUNY Institute for Demographic Research") echo 'selected';?>>CUNY Institute for Demographic Research</option>
+				<option <?php if ( $data['program'] == "Decision Sciences") echo 'selected';?>>Decision Sciences</option>
+				<option <?php if ( $data['program'] == "Department of Black and Latino Studies") echo 'selected';?>>Department of Black and Latino Studies</option>
+				<option <?php if ( $data['program'] == "Department of Communication Studies") echo 'selected';?>>Department of Communication Studies</option>
+				<option <?php if ( $data['program'] == "Department of English") echo 'selected';?>>Department of English</option>
+				<option <?php if ( $data['program'] == "Department of Fine and Performing Arts") echo 'selected';?>>Department of Fine and Performing Arts</option>
+				<option <?php if ( $data['program'] == "Department of History") echo 'selected';?>>Department of History</option>
+				<option <?php if ( $data['program'] == "Department of Journalism and the Writing Professions") echo 'selected';?>>Department of Journalism and the Writing Professions</option>
+				<option <?php if ( $data['program'] == "Department of Law") echo 'selected';?>>Department of Law</option>
+				<option <?php if ( $data['program'] == "Department of Management") echo 'selected';?>>Department of Management</option>
+				<option <?php if ( $data['program'] == "Department of Marketing and International Business") echo 'selected';?>>Department of Marketing and International Business</option>
+				<option <?php if ( $data['program'] == "Department of Mathematics") echo 'selected';?>>Department of Mathematics</option>
+				<option <?php if ( $data['program'] == "Department of Modern Languages and Comparative Literature") echo 'selected';?>>Department of Modern Languages and Comparative Literature</option>
+				<option <?php if ( $data['program'] == "Department of Natural Sciences") echo 'selected';?>>Department of Natural Sciences</option>
+				<option <?php if ( $data['program'] == "Department of Philosophy") echo 'selected';?>>Department of Philosophy</option>
+				<option <?php if ( $data['program'] == "Department of Political Science") echo 'selected';?>>Department of Political Science</option>
+				<option <?php if ( $data['program'] == "Department of Psychology") echo 'selected';?>>Department of Psychology</option>
+				<option <?php if ( $data['program'] == "Department of Sociology and Anthropology") echo 'selected';?>>Department of Sociology and Anthropology</option>
+				<option <?php if ( $data['program'] == "Department of Statistics and Computer Information Systems") echo 'selected';?>>Department of Statistics and Computer Information Systems</option>
+				<option <?php if ( $data['program'] == "Dual-Degree Program in Nursing Administration and Public Administration") echo 'selected';?>>Dual-Degree Program in Nursing Administration and Public Administration</option>
+				<option <?php if ( $data['program'] == "Economics") echo 'selected';?>>Economics</option>
+				<option <?php if ( $data['program'] == "Education Program") echo 'selected';?>>Education Program</option>
+				<option <?php if ( $data['program'] == "Entrepreneurship (MS)") echo 'selected';?>>Entrepreneurship (MS)</option>
+				<option <?php if ( $data['program'] == "Executive MBA Program") echo 'selected';?>>Executive MBA Program</option>
+				<option <?php if ( $data['program'] == "Executive MPA") echo 'selected';?>>Executive MPA</option>
+				<option <?php if ( $data['program'] == "Executive MS in Analysis of Financial Statements, Internal Operations, and Risk Assessment") echo 'selected';?>>Executive MS in Analysis of Financial Statements, Internal Operations, and Risk Assessment</option>
+				<option <?php if ( $data['program'] == "Executive MS in Business Computer Information Systems") echo 'selected';?>>Executive MS in Business Computer Information Systems</option>
+				<option <?php if ( $data['program'] == "Executive MS in Finance") echo 'selected';?>>Executive MS in Finance</option>
+				<option <?php if ( $data['program'] == "Executive MS in Industrial and Labor Relations (MSILR)") echo 'selected';?>>Executive MS in Industrial and Labor Relations (MSILR)</option>
+				<option <?php if ( $data['program'] == "Executive MS in Taxation") echo 'selected';?>>Executive MS in Taxation</option>
+				<option <?php if ( $data['program'] == "Film Studies Program") echo 'selected';?>>Film Studies Program</option>
+				<option <?php if ( $data['program'] == "Finance") echo 'selected';?>>Finance</option>
+				<option <?php if ( $data['program'] == "General MBA Option") echo 'selected';?>>General MBA Option</option>
+				<option <?php if ( $data['program'] == "Global Studies Program") echo 'selected';?>>Global Studies Program</option>
+				<option <?php if ( $data['program'] == "Health Care Administration") echo 'selected';?>>Health Care Administration</option>
+				<option <?php if ( $data['program'] == "Industrial and Organizational Psychology") echo 'selected';?>>Industrial and Organizational Psychology</option>
+				<option <?php if ( $data['program'] == "Information Systems (MBA)") echo 'selected';?>>Information Systems (MBA)</option>
+				<option <?php if ( $data['program'] == "Information Systems (MS)") echo 'selected';?>>Information Systems (MS)</option>
+				<option <?php if ( $data['program'] == "Interdisciplinary Programs and Courses") echo 'selected';?>>Interdisciplinary Programs and Courses</option>
+				<option <?php if ( $data['program'] == "International Business") echo 'selected';?>>International Business</option>
+				<option <?php if ( $data['program'] == "Jewish Studies Center") echo 'selected';?>>Jewish Studies Center</option>
+				<option <?php if ( $data['program'] == "Jewish Studies Program") echo 'selected';?>>Jewish Studies Program</option>
+				<option <?php if ( $data['program'] == "Joint JD and MBA Program (external)") echo 'selected';?>>Joint JD and MBA Program (external)</option>
+				<option <?php if ( $data['program'] == "Latin American and Caribbean Studies") echo 'selected';?>>Latin American and Caribbean Studies</option>
+				<option <?php if ( $data['program'] == "Lawrence N. Field Center for Entrepreneurship") echo 'selected';?>>Lawrence N. Field Center for Entrepreneurship</option>
+				<option <?php if ( $data['program'] == "Library Department") echo 'selected';?>>Library Department</option>
+				<option <?php if ( $data['program'] == "MA in Corporate Communication") echo 'selected';?>>MA in Corporate Communication</option>
+				<option <?php if ( $data['program'] == "MA in Mental Health Counseling") echo 'selected';?>>MA in Mental Health Counseling</option>
+				<option <?php if ( $data['program'] == "Management and Entrepreneurship (MBA)") echo 'selected';?>>Management and Entrepreneurship (MBA)</option>
+				<option <?php if ( $data['program'] == "Management and Operations Management") echo 'selected';?>>Management and Operations Management</option>
+				<option <?php if ( $data['program'] == "Management and Organizational Behavior-Human Resource Management") echo 'selected';?>>Management and Organizational Behavior-Human Resource Management</option>
+				<option <?php if ( $data['program'] == "Management and Sustainable Business") echo 'selected';?>>Management and Sustainable Business</option>
+				<option <?php if ( $data['program'] == "Marketing (MBA)") echo 'selected';?>>Marketing (MBA)</option>
+				<option <?php if ( $data['program'] == "Marketing (MS)") echo 'selected';?>>Marketing (MS)</option>
+				<option <?php if ( $data['program'] == "Master of Public Administration Program") echo 'selected';?>>Master of Public Administration Program</option>
+				<option <?php if ( $data['program'] == "MS in Financial Engineering") echo 'selected';?>>MS in Financial Engineering</option>
+				<option <?php if ( $data['program'] == "MS in Industrial and Organizational Psychology") echo 'selected';?>>MS in Industrial and Organizational Psychology</option>
+				<option <?php if ( $data['program'] == "MSEd in Educational Leadership") echo 'selected';?>>MSEd in Educational Leadership</option>
+				<option <?php if ( $data['program'] == "MSEd in Higher Education Administration") echo 'selected';?>>MSEd in Higher Education Administration</option>
+				<option <?php if ( $data['program'] == "MSEd Programs (SPA)") echo 'selected';?>>MSEd Programs (SPA)</option>
+				<option <?php if ( $data['program'] == "National Urban Fellows — MPA") echo 'selected';?>>National Urban Fellows — MPA</option>
+				<option <?php if ( $data['program'] == "New York Census Research Data Center") echo 'selected';?>>New York Census Research Data Center</option>
+				<option <?php if ( $data['program'] == "Physical and Health Education") echo 'selected';?>>Physical and Health Education</option>
+				<option <?php if ( $data['program'] == "Public Affairs Program") echo 'selected';?>>Public Affairs Program</option>
+				<option <?php if ( $data['program'] == "Quantitative Methods and Modeling") echo 'selected';?>>Quantitative Methods and Modeling</option>
+				<option <?php if ( $data['program'] == "Real Estate (MBA)") echo 'selected';?>>Real Estate (MBA)</option>
+				<option <?php if ( $data['program'] == "Real Estate (MS)") echo 'selected';?>>Real Estate (MS)</option>
+				<option <?php if ( $data['program'] == "Real Estate Program") echo 'selected';?>>Real Estate Program</option>
+				<option <?php if ( $data['program'] == "Religion and Culture Program") echo 'selected';?>>Religion and Culture Program</option>
+				<option <?php if ( $data['program'] == "Robert Zicklin Center for Corporate Integrity") echo 'selected';?>>Robert Zicklin Center for Corporate Integrity</option>
+				<option <?php if ( $data['program'] == "School of Public Affairs") echo 'selected';?>>School of Public Affairs</option>
+				<option <?php if ( $data['program'] == "Stan Ross Department of Accountancy") echo 'selected';?>>Stan Ross Department of Accountancy</option>
+				<option <?php if ( $data['program'] == "Statistics (MBA)") echo 'selected';?>>Statistics (MBA)</option>
+				<option <?php if ( $data['program'] == "Statistics (MS)") echo 'selected';?>>Statistics (MS)</option>
+				<option <?php if ( $data['program'] == "Steven L. Newman Real Estate Institute") echo 'selected';?>>Steven L. Newman Real Estate Institute</option>
+				<option <?php if ( $data['program'] == "Taxation (MBA)") echo 'selected';?>>Taxation (MBA)</option>
+				<option <?php if ( $data['program'] == "Taxation (MS)") echo 'selected';?>>Taxation (MS)</option>
+				<option <?php if ( $data['program'] == "The Baruch MBA in Health Care Administration") echo 'selected';?>>The Baruch MBA in Health Care Administration</option>
+				<option <?php if ( $data['program'] == "The Professional Certificate in Taxation (PCT)") echo 'selected';?>>The Professional Certificate in Taxation (PCT)</option>
+				<option <?php if ( $data['program'] == "Wasserman Trading Floor and Subotnick Financial Services Center") echo 'selected';?>>Wasserman Trading Floor and Subotnick Financial Services Center</option>
+				<option <?php if ( $data['program'] == "Weissman Center for International Business") echo 'selected';?>>Weissman Center for International Business</option>
+				<option <?php if ( $data['program'] == "Weissman School of Arts and Sciences") echo 'selected';?>>Weissman School of Arts and Sciences</option>
+				<option <?php if ( $data['program'] == "Women's Studies Program") echo 'selected';?>>Women's Studies Program</option>
+				<option <?php if ( $data['program'] == "Zicklin School Of Business") echo 'selected';?>>Zicklin School Of Business</option>
 			</select>
 		</div>
 		<div id="course_website" class="<?php if (!( $data['role'] == 'Professor' ) ) echo 'hide_question '; ?>professor question">
@@ -613,7 +827,7 @@ function nbm_network_manage_general_tab() {
 
 		$data = $wpdb->get_results('SELECT * from ' . $tablename , ARRAY_A);				// Selects all the roles in the wpnbm_data table
 
-		$uses = array( 'course_website' => 0 , 'Personal Blog'  => 0 , 'Portfolio'  => 0 , 'Research Blog'  => 0 , 'Other' => 0 ); // An array for the uses to check for the "Other field"
+		$uses = array( 'course_website' => 0 , 'Personal Blog' => 0 , 'Portfolio' => 0 , 'Research Blog' => 0 , 'Other' => 0 ); // An array for the uses to check for the "Other field"
 
 		// foreach statements that pulls the data from the SQL query into a usable array
 		foreach ( $data as $datum ) {
@@ -679,10 +893,11 @@ function nbm_network_admin_table_tab() {
    //Fetch, prepare, sort, and filter our data...
    $metaTable->prepare_items();
    
-   ?>
-   <div class="wrap">
-       
-       <div style="background: no-repeat url('wp-content/plugins/network-blog-metadata/images/data_32.png');" class="icon32"><br/></div>
+   
+   		echo "<div class='wrap'>";
+       	$dir=plugins_url( 'images/data_32.png' , __FILE__ );
+    	echo '<div id="icon-themes" class="icon32" style="background: url(\''.$dir.'\') no-repeat; background-size: 95%;"><br></div>';
+       ?>
        <h2>Blog Metadata</h2>      
        <form id="blog_metadata" method="get">
            <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
@@ -725,7 +940,8 @@ function nbm_download_csv_blogs_meta() {
 						'course_name' ,
 						'course_number',
 						'major',
-						'department'
+						'department',
+						'program'
 			);
 
 	nbm_array_to_csv_download( $data , $header , 'blog_metadata.csv' , ',' );
@@ -828,7 +1044,7 @@ function nbm_populate_null() {
 	$ids = array_flip($ids);
 	$count = 0;
 	foreach ( $ids as $id ) {
-		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL )';
+		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
 		$result = $wpdb->get_results($sql);
 		$count++;
 	}
@@ -863,7 +1079,7 @@ nbm_uninstall(): needs to be written
 // Make sure that these options are for the base table and not a per-blog table.
 
 global $nbm_db_version;
-$nbm_db_version = '1.0'; // Current version
+$nbm_db_version = '1.1'; // Current version
 
 function nbm_create_table() {
 	// Function to create the data table
@@ -882,6 +1098,7 @@ function nbm_create_table() {
 			  `course_number` VARCHAR(45) NULL ,
 			  `major` VARCHAR(128) NULL ,
 			  `department` VARCHAR(128) NULL ,
+			  `program` VARCHAR(128) NULL ,			  
 			  PRIMARY KEY (`blog_id`) ,
 			  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
 			);";
@@ -891,7 +1108,20 @@ function nbm_create_table() {
 		dbDelta( $sql );
 		
 		update_option( "nbm_db_version", $nbm_db_version ); // Updates the table schema version
-	  
+	  nbm_update_sql_table();
+}
+
+function nbm_update_sql_table() {
+
+   global $wpdb;
+   $tablename = $wpdb->base_prefix . "nbm_data"; // General tablename
+
+	$t = count($wpdb->get_results("show columns from `$tablename` like 'program'"));
+
+  	if (! $t ) {
+  		$sql = ("ALTER TABLE `$tablename` ADD program VARCHAR(128) NULL");
+  		$wpdb->get_results($sql);
+   }
 }
 
 
