@@ -15,7 +15,7 @@ nbm_uninstall(): needs to be written
 // Make sure that these options are for the base table and not a per-blog table.
 
 global $nbm_db_version;
-$nbm_db_version = '1.1'; // Current version
+$nbm_db_version = '1.2'; // Current version
 
 function nbm_create_table() {
 	// Function to create the data table
@@ -35,6 +35,7 @@ function nbm_create_table() {
 			  `major` VARCHAR(128) NULL ,
 			  `department` VARCHAR(128) NULL ,
 			  `program` VARCHAR(128) NULL ,			  
+			  `class_type` VARCHAR(128) NULL ,			  
 			  PRIMARY KEY (`blog_id`) ,
 			  UNIQUE KEY `blog_id_UNIQUE` (`blog_id` ASC)
 			);";
