@@ -5,10 +5,8 @@ We need a new name.
 This plugin will collect and store metadata about blogs on a network install of Wordpress
 
 ### Todo
-* Re-populate after errors
-* Get actual data (list of departments, majors, etc...)
+
 * Doublecheck Install and uninstall hooks
-* Separate Staff and Faculty "department"
 * Test for cross-browser compatibility
 * Finish writing roadmap
 * Convert code to be read by doxygen
@@ -33,6 +31,9 @@ This plugin will collect and store metadata about blogs on a network install of 
 * ~~Test to make sure there are no conflicts with BuddyPress~~
 * ~~Create Network Admin Tableview~~
 * ~~Validate user signup fields* Return errors on fields~~ (not necessary for B@B)
+* ~~Re-populate after errors~~
+* ~~Get actual data (list of departments, majors, etc...)~~
+* ~~Separate Staff and Faculty "department"~~
 
 ### Browsers checked
 * Safari (mac) 6
