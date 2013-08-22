@@ -181,7 +181,8 @@ function nbm_download_csv_blogs_meta() {
 						'class_number',
 						'major',
 						'department',
-						'program'
+						'program',
+						'class_type'
 			);
 
 	nbm_array_to_csv_download( $data , $header , 'blog_metadata.csv' , ',' );
@@ -209,7 +210,7 @@ function nbm_network_admin_export_tab() {
 CSV: (showing first 50 entries)<br />
 -------------
 <pre style="border: 1px dotted gray; padding: 20px; max-width: 800px;">
-blog_id,role,purpose,class_name,class_number,major,department,program
+blog_id,role,purpose,class_name,class_number,major,department,program,class_type
 <?php
 foreach ($data as $datum) {
 	foreach ( $datum as $val ) {
