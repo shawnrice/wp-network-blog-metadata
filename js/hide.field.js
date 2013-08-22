@@ -8,52 +8,114 @@
 	$(document).ready(function() {
 		$('.hide_question').hide();
 		$('select[name="role"]').change(function() {
-			if ($(this).val() === "Professor") {
-				$('.student , .staff , .purpose').fadeOut(200);
+			if ($(this).val() === "Faculty") {
+				$('.student , .staff , .other_role , .purpose').fadeOut(200);
 				$('.student , .staff , .purpose select').val('');
+				$('.other_role , .staff , .student input').val('');
+
+				other_role
 				setTimeout(function(){
-						$('.professor , .professor-staff').fadeIn(200);}, 200);
+						$('.faculty , .faculty-staff').fadeIn(200);}, 200);
 			}
 			else if ($(this).val() === "Student") {
-				$('.professor , .staff, .professor-staff , .course_website').fadeOut(200);
+				$('.faculty , .staff, .faculty-staff , .other_role , .class_site').fadeOut(200);
 				// Reset some values if they were put in...
-				$('.professor , .staff , .professor-staff , .course_website input').val('');
-				$('.professor , .professor-staff select').val('');
+				$('.faculty , .staff , .faculty-staff , .other_role , .class_site input').val('');
+				$('.faculty , .faculty-staff select').val('');
+
+				$('#nbm_purpose')
+					.find('option')
+					.remove()
+					.end()
+					.append('<option value="">---</option>')
+					.append('<option value="Class website">Class website</option>')
+					.append('<option value="Club site">Club site</option>')
+					.append('<option value="Portfolio">Portfolio</option>')
+					.append('<option value="Personal/group blog">Personal/group blog</option>')
+					.append('<option value="Other">Other</option>')
+					.val('');
+
 
 				setTimeout(function(){
 					$('.student , .purpose').fadeIn(200);}, 200);
 			}
 			else if ($(this).val() === "Staff") {
-				$('.professor , .course_website, .student').fadeOut(200);		
+				$('.faculty , .class_site, .other_role , .student').fadeOut(200);		
 				// Reset some values if they were put in...
-				$('.course_website , .professor , .student input').val('');
-				$('.course_website , .student select').val('');
+				$('.class_site , .faculty , .other_role , .student input').val('');
+				$('.class_site , .student select').val('');
+				$('#nbm_purpose')
+					.find('option')
+					.remove()
+					.end()
+					.append('<option value="">---</option>')
+					.append('<option value="Departmental site">Departmental site</option>')
+					.append('<option value="Project site">Project site</option>')
+					.append('<option value="Personal/group blog">Personal/group blog</option>')
+					.append('<option value="Other">Other</option>')
+					.val('');
 				setTimeout(function(){
-					$('.staff , .professor-staff , .purpose').fadeIn(200);}, 200);
+					$('.staff , .faculty-staff , .purpose').fadeIn(200);}, 200);
+
+			}
+			else if ($(this).val() === "Other") {
+				$('.faculty , .staff , .class_site, .faculty-staff , .student').fadeOut(200);		
+				// Reset some values if they were put in...
+				$('.class_site , .staff , .faculty , .faculty-staff , .student input').val('');
+				$('.class_site , .staff , .faculty , .faculty-staff , .student select').val('');
+				$('#nbm_purpose')
+					.find('option')
+					.remove()
+					.end()
+					.append('<option value="">---</option>')
+					.append('<option value="Project site">Project site</option>')
+					.append('<option value="Personal/group blog">Personal/group blog</option>')
+					.append('<option value="Other">Other</option>')
+					.val('');
+				setTimeout(function(){
+					$('.other_role , .purpose').fadeIn(200);}, 200);
+
+			}
+			else if ($(this).val() === "") {
+				$('.faculty , .staff , .class_site, .faculty-staff , .other_role , .purpose , .student').fadeOut(200);		
+				// Reset some values if they were put in...
+				$('.class_site , .staff , .faculty , .faculty-staff , .other_role , .purpose , .student input').val('');
+				$('.class_site , .staff , .faculty , .faculty-staff , .other_role , .purpose , .student select').val('');
 
 			}
 			$('.temp').fadeIn(200);
 		});
-		$('select[name="course_website"]').change(function() {
+		$('select[name="class_site"]').change(function() {
 			if ($(this).val() === "Yes") {
 				$('.purpose').fadeOut(200);
 				$('.purpose select').val('');
 				setTimeout(function(){
-					$('.course_website').fadeIn(200);}, 200);
+					$('.class_site').fadeIn(200);}, 200);
 			}
 			else if ($(this).val() === "No") {
-				$('.course_website').fadeOut(200);
-				$('.course_website input').val('');
+				$('.class_site').fadeOut(200);
+				$('.class_site input').val('');
+				$('.class_site select').val('');				
+				$('#nbm_purpose')
+					.find('option')
+					.remove()
+					.end()
+					.append('<option value="">---</option>')
+					.append('<option value="Departmental site">Departmental site</option>')
+					.append('<option value="Project site">Project site</option>')
+					.append('<option value="Personal/group blog">Personal/group blog</option>')
+					.append('<option value="Other">Other</option>')
+					.val('');				
 				setTimeout(function(){
 					$('.purpose').fadeIn(200);}, 200);
 
 				// Reset some values if they were put in...
 			}
 			else if ($(this).val() === "") {
-				$('.course_website , .purpose').fadeOut(200);
+				$('.class_site , .purpose').fadeOut(200);
 
 				// Reset some values if they were put in...
-				$('.course_website input').val('');
+				$('.class_site input').val('');
 				$('.purpose select').val('');
 			}
 		});
@@ -64,6 +126,8 @@
 			}
 			else {
 				$('.use_other').fadeOut(200);
+				$('.use_other input').val('');
+
 			}
 		});
 		function resetValues(type , name) {

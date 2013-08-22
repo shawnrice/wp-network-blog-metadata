@@ -53,8 +53,8 @@ class Network_Blog_Metadata_Table extends WP_List_Table {
 			case 'blog_id':
                 return $item[$column_name];
 	        case 'purpose':
-				$uses = array( 'Personal Blog' , 'course_website' , 'Research Blog' , 'Other' , 'Portfolio' );
-				if ( $item[$column_name] == 'course_website' ) return 'Course Website';
+				$uses = array( 'Personal Blog' , 'class_site' , 'Research Blog' , 'Other' , 'Portfolio' );
+				if ( $item[$column_name] == 'class_site' ) return 'Class Site';
 				else if (  $item[$column_name] == 'x' ) return 'x';
 				else if ( ! empty( $item[$column_name] ) && (! in_array( $item[$column_name] , $uses ) ) ) return 'Other (' . $item[$column_name] . ')';
 				else return $item[$column_name];
