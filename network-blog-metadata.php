@@ -200,7 +200,6 @@ function process_nbm_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id
 						$_POST["program"] . ', ' .
 						$_POST["class_type"] . ')';
 			}
-			echo $sql;
 			$wpdb->query($wpdb->prepare($sql)); // Insert into the DB after preparing it.
 		}
 }
