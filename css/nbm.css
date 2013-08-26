@@ -146,3 +146,9 @@ button, input[type=submit], input[type=button] {
 	line-height: 14px;
 }
 
+
+.hide_question {
+
+	display: none;
+}
+

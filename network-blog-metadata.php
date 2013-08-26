@@ -47,7 +47,7 @@ if ( is_admin() ) {
 					' WHERE `blog_id` = ' . $blog_id;
 			
 			$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
-			 nbm_update_sql_table(); // minor check that will be taken out soon. !!!!!!!
+			nbm_update_sql_table(); // minor check that will be taken out soon. !!!!!!!
 	
 
 	?>
@@ -75,7 +75,7 @@ if ( is_admin() ) {
 		$data['class_type'] = $_POST['class_type'];		
 
 	$roles = array( 'Faculty' , 'Student' , 'Staff' , '' );
-	$purposes = array( 'Departmental site' , 'Project site' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
+	$purposes = array( 'Departmental site' , 'Project site' , 'Class website' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
 
 	if ( (! in_array( $data['purpose'] , $purposes ) ) && (! empty( $data['purpose'] ) ) ) {
 		$data['purpose'] = $data['use_other'];
@@ -96,7 +96,7 @@ if ( is_admin() ) {
 		$role_other = TRUE;
 	}
 
-	$purposes = array( 'Departmental site' , 'Project site' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
+	$purposes = array( 'Departmental site' , 'Project site' , 'Class website' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
 	if ( (! in_array( $data['purpose'] , $purposes ) ) && (! empty( $data['purpose'] ) ) ) {
 		$purpose_other = TRUE;
 	}
@@ -104,6 +104,8 @@ if ( is_admin() ) {
 	if ( is_admin() ) { 
 		if ( $data['purpose'] == 'class_site' ) {
 			$data['class_site'] = 'Yes';
+		} else  {
+			$data['class_site'] = 'No';
 		}
 
 	}

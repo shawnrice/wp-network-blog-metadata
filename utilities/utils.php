@@ -60,7 +60,7 @@ function nbm_populate_null() {
 	$ids = array_flip($ids);
 	$count = 0;
 	foreach ( $ids as $id ) {
-		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
+		$sql = 'INSERT INTO ' . $tablename . ' VALUES( ' . $id . ' , NULL , NULL , NULL , NULL , NULL , NULL , NULL , NULL )';
 		$result = $wpdb->get_results($sql);
 		$count++;
 	}
