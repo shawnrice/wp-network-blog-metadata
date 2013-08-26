@@ -35,6 +35,8 @@ function nbm_append_signup() {
 	//  Enqueue the javascript to reset values and hide fields
 		wp_register_script( 'hide-field-js', plugins_url( '/js/hide.field.js', __FILE__ ) );
 		wp_enqueue_script( 'hide-field-js' );
+	    wp_register_style( 'nbm', plugins_url( '/css/nbm.css', __FILE__ ) );
+		wp_enqueue_style( 'nbm' );
 
 	if ( is_admin() && $_SERVER["REQUEST_METHOD"] == "POST" ) {
 		process_nbm_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id, $meta);
