@@ -47,7 +47,7 @@
 ?>
 			</select>
 		</div>
-		<div id="use_other" class="<?php if ( ! $purpose_other ) echo 'hide_question '; ?>use_other">
+		<div id="use_other" class="<?php if ( ! $purpose_other ) echo 'hide_question '; ?>use_other question">
 			<label for="use_other" class="use_other"><?php _e( 'Please specify:' ) ?></label>				
-			<input name="use_other" class="use_other"<?php if ( $purpose_other )  echo ' value="' . esc_html( $data['purpose'] ) . '"';?>>
+			<input name="use_other" class="use_other "<?php if ( $purpose_other )  echo ' value="' . esc_html( $data['purpose'] ) . '"';?>>
 		</div>
