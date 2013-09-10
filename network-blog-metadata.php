@@ -42,101 +42,105 @@ function nbm_append_signup() {
 		process_nbm_on_blog_signup($blog_id, $user_id, $domain, $path, $site_id, $meta);
 	}
 
+	if ( is_admin() ) {
+			// Setup the SQL query
+				$sql = 	'SELECT * from ' . $tablename .
+						' WHERE `blog_id` = ' . $blog_id;
+				
+				$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
+				nbm_update_sql_table(); // minor check that will be taken out soon. !!!!!!!
+		
 
-if ( is_admin() ) {
-		// Setup the SQL query
-			$sql = 	'SELECT * from ' . $tablename .
-					' WHERE `blog_id` = ' . $blog_id;
-			
-			$data = $wpdb->get_row($sql , ARRAY_A); 			// get_row method works here because there is only ever one row that matches.
-			nbm_update_sql_table(); // minor check that will be taken out soon. !!!!!!!
-	
 
-	?>
 
-	   <div class="wrap">
+		?>
 
-	<?php 
+		   <div class="wrap">
 
-		$dir = plugins_url( 'images/data_32.png' , __FILE__ );
-	   	echo '<div id="icon-themes" class="icon32" style="background: url(\''.$dir.'\') no-repeat; background-size: 95%;"><br></div>'; 
-} else {
+		<?php 
 
-// Get the values from the $_POST array so as to fill them back in when a registration fails
-	if (!empty( $_POST ) ) {
-		$data['role'] = $_POST['role'];
-		$data['department'] = $_POST['department'];
-		$data['major'] = $_POST['major'];
-		$data['program'] = $_POST['program'];
-		$data['class_site'] = $_POST['class_site'];
-		$data['class_name'] = $_POST['class_name'];
-		$data['class_number'] = $_POST['class_number'];
-		$data['purpose'] = $_POST['purpose'];
-		$data['use_other'] = $_POST['use_other'];
-		$data['other_role'] = $_POST['other_role'];
-		$data['class_type'] = $_POST['class_type'];		
+			$dir = plugins_url( 'images/data_32.png' , __FILE__ );
+		   	echo '<div id="icon-themes" class="icon32" style="background: url(\''.$dir.'\') no-repeat; background-size: 95%;"><br></div>'; 
+	} else {
 
-	$roles = array( 'Faculty' , 'Student' , 'Staff' , '' );
-	$purposes = array( 'Departmental site' , 'Project site' , 'Class website' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
+	// Get the values from the $_POST array so as to fill them back in when a registration fails
+		if (!empty( $_POST ) ) {
+			$data['role'] = $_POST['role'];
+			$data['department'] = $_POST['department'];
+			$data['major'] = $_POST['major'];
+			$data['program'] = $_POST['program'];
+			$data['class_site'] = $_POST['class_site'];
+			$data['class_name'] = $_POST['class_name'];
+			$data['class_number'] = $_POST['class_number'];
+			$data['purpose'] = $_POST['purpose'];
+			$data['use_other'] = $_POST['use_other'];
+			$data['other_role'] = $_POST['other_role'];
+			$data['class_type'] = $_POST['class_type'];		
 
-	if ( (! in_array( $data['purpose'] , $purposes ) ) && (! empty( $data['purpose'] ) ) ) {
-		$data['purpose'] = $data['use_other'];
-		$purpose_other = TRUE;
+			$roles = array( 'Faculty' , 'Student' , 'Staff' , '' );
+			$purposes = array( 'Departmental site' , 'Project site' , 'Class website' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
+
+			if ( (! in_array( $data['purpose'] , $purposes ) ) && (! empty( $data['purpose'] ) ) ) {
+				$data['purpose'] = $data['use_other'];
+				$purpose_other = TRUE;
+			}
+
+			if ( (! in_array( $data['role'] , $roles ) ) && (! empty( $data['role'] ) ) ) {
+				$role_other = TRUE;
+				$data['role'] = $data['other_role'];
+			}
+		}
 	}
 
-	if ( (! in_array( $data['role'] , $roles ) ) && (! empty( $data['role'] ) ) ) {
-		$role_other = TRUE;
-		$data['role'] = $data['other_role'];
-	}
-
-	}
-}
+	if ( ! ( ( isset( $_POST['groupblog-create-new'] ) && $_POST['groupblog-create-new'] == 'yes') ) ) :
 	if ( (! ( isset( $_POST['submit'] ) && ( $_POST['submit'] == 'Create Site' ) ) ) || ( is_admin() ) ) {
 
-	$roles = array( 'Faculty' , 'Student' , 'Staff' , '' );
-	if ( (! in_array( $data['role'] , $roles ) ) && (! empty( $data['role'] ) ) ) {
-		$role_other = TRUE;
-	}
-
-	$purposes = array( 'Departmental site' , 'Project site' , 'Class website' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
-	if ( (! in_array( $data['purpose'] , $purposes ) ) && (! empty( $data['purpose'] ) ) ) {
-		$purpose_other = TRUE;
-	}
-
-	if ( is_admin() ) { 
-		if ( $data['purpose'] == 'class_site' ) {
-			$data['class_site'] = 'Yes';
-		} else  {
-			$data['class_site'] = 'No';
+		$roles = array( 'Faculty' , 'Student' , 'Staff' , '' );
+		if ( (! in_array( $data['role'] , $roles ) ) && (! empty( $data['role'] ) ) ) {
+			$role_other = TRUE;
 		}
 
-	}
+		$purposes = array( 'Departmental site' , 'Project site' , 'Class website' , 'Class site' , 'Club site' , 'Portfolio' , 'Personal/group blog' , 'Other' , 'class_site' );
+		if ( (! in_array( $data['purpose'] , $purposes ) ) && (! empty( $data['purpose'] ) ) ) {
+			$purpose_other = TRUE;
+		}
+
+		if ( is_admin() ) { 
+			if ( $data['purpose'] == 'class_site' ) {
+				$data['class_site'] = 'Yes';
+			} else  {
+				$data['class_site'] = 'No';
+			}
+
+		}
 
 ?>
 
-<?php include( 'preface.php' ); ?>
-<?php include( 'fields/role.php' ); ?>
-<?php include( 'fields/classes.php' ); ?>
-<?php include( 'fields/purpose.php' ); ?>
-<?php include( 'fields/department.php' ); ?>
-<?php include( 'fields/majors.php' ); ?>
-<?php include( 'fields/programs.php' ); ?>
+		<?php include( 'preface.php' ); ?>
+		<?php include( 'fields/role.php' ); ?>
+		<?php include( 'fields/classes.php' ); ?>
+		<?php include( 'fields/purpose.php' ); ?>
+		<?php include( 'fields/department.php' ); ?>
+		<?php include( 'fields/majors.php' ); ?>
+		<?php include( 'fields/programs.php' ); ?>
 
 
-	</div>
-	<?php if (! is_admin() ) { ?>
-	<div>
-		<p>&nbsp;</p>
-	</div>
-	<?php } else { echo "<br />"; }
-	if ( is_admin() ) { ?>
-		<div class="buttons">
-			<input type="submit" />
 		</div>
-	</form>
-<?php	
+		<?php if (! is_admin() ) { ?>
+		<div>
+			<p>&nbsp;</p>
+		</div>
+		<?php } else { echo "<br />"; }
+		if ( is_admin() ) { ?>
+			<div class="buttons">
+				<input type="submit" />
+			</div>
+		</form>
+	<?php	
+			}
 		}
-	}
+	endif;
+
 }
 
 // When the new site is finally created (user has followed the activation link provided via e-mail), add a row to the options table with the value he submitted during signup
