@@ -1,14 +1,17 @@
 # Network Blog Metadata
-We need a new name.
+Still a placeholder name for the plugin.
 
 ## Purpose of the plugin
-This plugin will collect and store metadata about blogs on a network install of Wordpress
+This plugin will collect and store metadata about blogs on a network install of Wordpress, specifically a Buddypress installation.
+
+## Status of the code
+This code could now be considered legacy code in that it exists on [Blogs at Baruch](https://blsciblogs.baruch.cuny.edu), but it is slated to be re-written from the ground up in order to make it available for others to use. Development has already begun.
+
+Consider this code to be the first stab at a project.
 
 ### Todo
 
 * Doublecheck Install and uninstall hooks
-* Test for cross-browser compatibility
-* Finish writing roadmap
 * Convert code to be read by doxygen
 
 
@@ -35,15 +38,6 @@ This plugin will collect and store metadata about blogs on a network install of 
 * ~~Get actual data (list of departments, majors, etc...)~~
 * ~~Separate Staff and Faculty "department"~~
 
-### Browsers checked
-* Safari (mac) 6
-* Chrome (mac) 27, 28
-* Firefox (mac) 21, 22
-
-### Browsers to check
-* IE
-* Chrome (PC)
-* Firefox (PC)
 
 
 #### Table design and implementation
@@ -59,13 +53,13 @@ The limitations here can be considered a roadmap for versions past the initial i
 
 ### Roadmap
 
-The following features will be created for v2.0, which will be abstracted so that the 
+The following features will be created for v2.0, which will be abstracted. The code will be developed either in another branch or in another repository. 
 
 * Allow for the dynamic creation of questions
 * Network Admin Menu to list the questions that are active
 * Create a way to make reports... (how? -- should these be add-ons?)
 * Create config settings to display certain reports (how? -- again, add-ons?)
-* Convert from procedural code to a class
+* Refactor procedural to OOP
 * Integrate graphs reports with either...
 	* Highcharts (http://www.highcharts.com/products/highcharts)
 	* Google Charts (https://developers.google.com/chart/)
